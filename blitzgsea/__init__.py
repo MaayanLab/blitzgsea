@@ -7,7 +7,10 @@ from scipy import interpolate
 from scipy.stats import norm
 from matplotlib import pyplot as plt
 
-
+def strip_gene_set(signature, gene_set):
+    signature_genes = set(signature.iloc[:,0])
+    return [x for x in gene_set if x in signature_genes]
+    
 def enrichment_score(signature, gene_set):
     rank_vector = signature.sort_values(1, ascending=False).set_index(0)
     gs = set(gene_set)
@@ -45,14 +48,12 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
     set_sizes = pd.DataFrame(list(cc.items()),columns = ['set_size','count']).sort_values("set_size")
     set_sizes["cumsum"] = np.cumsum(set_sizes.iloc[:,1])
     
-    x = [4,5,8,10,12,14,18,22,26,30,35]
+    x = [1,2,3,4,5,8,10,12,14,18,22,26,30,35,60,100,200,500, set_sizes.iloc[:,0].max()]
          
     means_pos = []
     sd_pos = []
-    
     means_neg = []
     sd_neg = []
-    
     pos_ratio = []
     
     for i in x:
@@ -107,3 +108,53 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
         
     return f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio
 
+def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plotting: bool=False, verbose: bool=False):
+    f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio = estimate_parameters(signature, library, permutations=permutations, plotting=plotting)
+    gsets = []
+    ess = []
+    pvals = []
+    nes = []
+    for gene_set_key in library.keys():
+        gene_set = strip_gene_set(signature, library[gene_set_key])
+        gsize = len(gene_set)
+        if gsize > 0:
+            rs, es = enrichment_score(signature, gene_set)
+
+            pos_mean = f_mean_pos(gsize)
+            pos_sd = f_sd_pos(gsize)
+            neg_mean = f_mean_neg(gsize)
+            neg_sd = f_sd_neg(gsize)
+
+            pos_ratio = f_pos_ratio(gsize)
+
+            gsets.append(gene_set_key)
+            ess.append(es)
+
+            if es > 0:
+                rv = norm(loc=pos_mean, scale=pos_sd)
+                prob = rv.cdf(es)
+                prob_one_tailed = 1 - (prob*pos_ratio + 1*(1-pos_ratio))
+                if two_tailed:
+                    rv = norm(loc=neg_mean, scale=neg_sd)
+                    prob_two_tailed = prob_one_tailed - rv.cdf(-es)
+                    nes.append(norm.ppf(1-prob_two_tailed))
+                    pvals.append(prob_two_tailed)
+                else:
+                    nes.append(norm.ppf(1-prob_one_tailed))
+                    pvals.append(prob_one_tailed)
+            else:
+                rv = norm(loc=neg_mean, scale=neg_sd)
+                prob = rv.cdf(es)
+                prob_one_tailed = 1 - (1*pos_ratio + prob*(1-pos_ratio))
+                if two_tailed:
+                    rv = norm(loc=pos_mean, scale=pos_sd)
+                    prob_two_tailed = prob_one_tailed - rv.cdf(es)
+                    nes.append(norm.ppf(1-prob_two_tailed))
+                    pvals.append(prob_two_tailed)
+                else:
+                    nes.append(norm.ppf(1-prob_one_tailed))
+                    pvals.append(prob_one_tailed)
+    res =  pd.DataFrame([gsets, ess, nes, pvals]).T
+    res.columns = ["gene_set", "es", "nes", "pval"]
+    
+    return res.sort_values("nes", key=abs, ascending=False)
