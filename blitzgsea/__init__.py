@@ -6,6 +6,7 @@ from collections import Counter
 from scipy import interpolate
 from scipy.stats import norm
 from matplotlib import pyplot as plt
+import tqdm
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.iloc[:,0])
@@ -56,8 +57,9 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
     sd_neg = []
     pos_ratio = []
     
-    for i in x:
-        print(i)
+    pbar = tqdm(x)
+    for i in pbar:
+        pbar.set_description("Parameter Calibration %s" % i)
         es = np.array(get_peak_size(signature, i, permutations=permutations))
         pos = [x for x in es if x > 0]
         param = norm.fit(pos)
@@ -68,6 +70,7 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
         means_neg.append(param[0])
         sd_neg.append(param[1])
         pos_ratio.append(len(pos)/(len(pos)+len(neg)))
+    pbar.close()
 
     x = np.array(x, dtype=float)
     
@@ -114,7 +117,10 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
     ess = []
     pvals = []
     nes = []
-    for gene_set_key in library.keys():
+
+    pbar = tqdm(library.keys())
+    for gene_set_key in pbar:
+        pbar.set_description("GSEA %s" % i)
         gene_set = strip_gene_set(signature, library[gene_set_key])
         gsize = len(gene_set)
         if gsize > 0:
@@ -154,6 +160,7 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
                 else:
                     nes.append(norm.ppf(1-prob_one_tailed))
                     pvals.append(prob_one_tailed)
+    pbar.close()
     res =  pd.DataFrame([gsets, ess, nes, pvals]).T
     res.columns = ["gene_set", "es", "nes", "pval"]
     

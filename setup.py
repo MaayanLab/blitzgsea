@@ -27,7 +27,8 @@ setuptools.setup(
         'numpy',
         'scikit-learn',
         'progress',
-        'loess'
+        'loess',
+        'tqdm'
     ],
     python_requires='>=3.6',
 )
