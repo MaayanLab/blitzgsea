@@ -118,9 +118,11 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
     pvals = []
     nes = []
 
-    pbar = tqdm(library.keys())
-    for gene_set_key in pbar:
-        pbar.set_description("GSEA %s" % i)
+    lib_keys = list(library.keys())
+    pbar = tqdm(range(len(lib_keys)))
+    for gene_set_key_i in pbar:
+        gene_set_key = lib_keys[gene_set_key_i]
+        pbar.set_description("GSEA %s" % gene_set_key_i)
         gene_set = strip_gene_set(signature, library[gene_set_key])
         gsize = len(gene_set)
         if gsize > 0:
