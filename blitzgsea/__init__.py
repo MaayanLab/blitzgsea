@@ -120,6 +120,7 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
 
     lib_keys = list(library.keys())
     pbar = tqdm(range(len(lib_keys)))
+    
     for gene_set_key_i in pbar:
         gene_set_key = lib_keys[gene_set_key_i]
         pbar.set_description("GSEA %s" % gene_set_key_i)
