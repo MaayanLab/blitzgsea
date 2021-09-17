@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import pandas as pd
-import loess
+from loess.loess_1d import loess_1d
 from collections import Counter
 from scipy import interpolate
 from scipy.stats import norm
