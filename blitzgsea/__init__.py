@@ -6,7 +6,7 @@ from collections import Counter
 from scipy import interpolate
 from scipy.stats import norm
 from matplotlib import pyplot as plt
-import tqdm
+from tqdm import tqdm
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.iloc[:,0])
