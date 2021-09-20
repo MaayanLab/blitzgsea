@@ -142,7 +142,7 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
             if es > 0:
                 rv = norm(loc=pos_mean, scale=pos_sd)
                 prob = rv.cdf(es)
-                prob_one_tailed = 1 - (prob*pos_ratio)
+                prob_one_tailed = prob*pos_ratio
                 if two_tailed:
                     rv = norm(loc=neg_mean, scale=neg_sd)
                     prob_two_tailed = prob_one_tailed - rv.cdf(-es)
@@ -154,7 +154,7 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
             else:
                 rv = norm(loc=neg_mean, scale=neg_sd)
                 prob = rv.cdf(es)
-                prob_one_tailed = 1 - (prob*(1-pos_ratio))
+                prob_one_tailed = prob*(1-pos_ratio)
                 if two_tailed:
                     rv = norm(loc=pos_mean, scale=pos_sd)
                     prob_two_tailed = prob_one_tailed - rv.cdf(es)
