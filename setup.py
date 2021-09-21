@@ -28,7 +28,8 @@ setuptools.setup(
         'scikit-learn',
         'progress',
         'loess',
-        'tqdm'
+        'tqdm',
+        'statsmodels'
     ],
     python_requires='>=3.6',
 )

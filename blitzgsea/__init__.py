@@ -7,6 +7,8 @@ from scipy import interpolate
 from scipy.stats import norm
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from statsmodels.stats.multitest import multipletests
+
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.iloc[:,0])
@@ -155,7 +157,11 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
                 nes.append(norm.ppf(prob_two_tailed))
                 pvals.append(prob_two_tailed)
     pbar.close()
-    res =  pd.DataFrame([gsets, ess, nes, pvals]).T
-    res.columns = ["gene_set", "es", "zscore", "pval"]
+
+    fdr_values = multipletests(pvals, method="fdr_bh")[1]
+    sidak_values = multipletests(pvals, method="sidak")[1]
+
+    res =  pd.DataFrame([gsets, ess, nes, pvals, sidak_values, fdr_values]).T
+    res.columns = ["gene_set", "es", "zscore", "pval", "sidak" "fdr"]
     
     return res.sort_values("pval", key=abs, ascending=True)
