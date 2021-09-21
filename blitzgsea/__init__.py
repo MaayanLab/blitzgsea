@@ -119,6 +119,7 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     ess = []
     pvals = []
     nes = []
+    set_size = []
 
     lib_keys = list(library.keys())
     pbar = tqdm(range(len(lib_keys)))
@@ -129,6 +130,7 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
         gene_set = strip_gene_set(signature, library[gene_set_key])
         gsize = len(gene_set)
         if gsize > 0:
+            set_size.append(gsize)
             rs, es = enrichment_score(signature, gene_set)
 
             pos_mean = f_mean_pos(gsize)
@@ -161,7 +163,8 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
-    res =  pd.DataFrame([gsets, ess, nes, pvals, sidak_values, fdr_values]).T
-    res.columns = ["gene_set", "es", "zscore", "pval", "sidak", "fdr"]
+    res =  pd.DataFrame([gsets, ess, nes, pvals, sidak_values, fdr_values, set_size]).T
+    res.columns = ["Term", "es", "zscore", "pval", "sidak", "fdr","geneset_size"]
+    res = res.set_index("Term")
     
     return res.sort_values("pval", key=abs, ascending=True)
