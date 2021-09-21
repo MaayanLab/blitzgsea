@@ -162,6 +162,6 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     sidak_values = multipletests(pvals, method="sidak")[1]
 
     res =  pd.DataFrame([gsets, ess, nes, pvals, sidak_values, fdr_values]).T
-    res.columns = ["gene_set", "es", "zscore", "pval", "sidak" "fdr"]
+    res.columns = ["gene_set", "es", "zscore", "pval", "sidak", "fdr"]
     
     return res.sort_values("pval", key=abs, ascending=True)
