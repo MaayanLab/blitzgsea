@@ -158,4 +158,4 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     res =  pd.DataFrame([gsets, ess, nes, pvals]).T
     res.columns = ["gene_set", "es", "zscore", "pval"]
     
-    return res.sort_values("nes", key=abs, ascending=False)
+    return res.sort_values("pval", key=abs, ascending=True)
