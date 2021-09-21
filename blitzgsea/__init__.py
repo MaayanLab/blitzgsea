@@ -111,7 +111,7 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
         
     return f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio
 
-def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plotting: bool=False, verbose: bool=False):
+def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False):
     f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio = estimate_parameters(signature, library, permutations=permutations, plotting=plotting)
     gsets = []
     ess = []
@@ -142,27 +142,15 @@ def gsea(signature, library, permutations: int=100, two_tailed: bool=False, plot
             if es > 0:
                 rv = norm(loc=pos_mean, scale=pos_sd)
                 prob = rv.cdf(es)
-                prob_one_tailed = prob*pos_ratio
-                if two_tailed:
-                    rv = norm(loc=neg_mean, scale=neg_sd)
-                    prob_two_tailed = prob_one_tailed - rv.cdf(-es)
-                    nes.append(norm.ppf(1-prob_two_tailed))
-                    pvals.append(prob_two_tailed)
-                else:
-                    nes.append(norm.ppf(1-prob_one_tailed))
-                    pvals.append(prob_one_tailed)
+                prob_two_tailed = np.max([prob*pos_ratio*2,1])
+                nes.append(norm.ppf(1-prob_two_tailed))
+                pvals.append(prob_two_tailed)
             else:
                 rv = norm(loc=neg_mean, scale=neg_sd)
                 prob = rv.cdf(es)
-                prob_one_tailed = prob*(1-pos_ratio)
-                if two_tailed:
-                    rv = norm(loc=pos_mean, scale=pos_sd)
-                    prob_two_tailed = prob_one_tailed - rv.cdf(es)
-                    nes.append(norm.ppf(1-prob_two_tailed))
-                    pvals.append(prob_two_tailed)
-                else:
-                    nes.append(norm.ppf(1-prob_one_tailed))
-                    pvals.append(prob_one_tailed)
+                prob_two_tailed = np.max([2*prob*(1-pos_ratio),1])
+                nes.append(norm.ppf(1-prob_two_tailed))
+                pvals.append(prob_two_tailed)
     pbar.close()
     res =  pd.DataFrame([gsets, ess, nes, pvals]).T
     res.columns = ["gene_set", "es", "nes", "pval"]
