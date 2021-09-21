@@ -163,7 +163,7 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
-    res =  pd.DataFrame([gsets, ess.astype("float"), nes.astype("float"), pvals.astype("float"), sidak_values.astype("float"), fdr_values.astype("float"), set_size.astype("int")]).T
+    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int")]).T
     res.columns = ["Term", "es", "zscore", "pval", "sidak", "fdr","geneset_size"]
     res = res.set_index("Term")
     
