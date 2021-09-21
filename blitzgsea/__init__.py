@@ -141,16 +141,16 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
 
             if es > 0:
                 rv = norm(loc=pos_mean, scale=pos_sd)
-                prob = rv.cdf(es)
+                prob = 1-rv.cdf(es)
                 prob_two_tailed = np.min([2*prob*pos_ratio,1])
                 if prob_two_tailed == 1:
                     nes.append(0)
                 else:
-                    nes.append(norm.ppf(prob_two_tailed))
-                pvals.append(1-prob_two_tailed)
+                    nes.append(norm.ppf(1-prob_two_tailed))
+                pvals.append(prob_two_tailed)
             else:
                 rv = norm(loc=neg_mean, scale=neg_sd)
-                prob = 1-rv.cdf(es)
+                prob = rv.cdf(es)
                 prob_two_tailed = np.min([2*prob*(1-pos_ratio),1])
                 nes.append(norm.ppf(prob_two_tailed))
                 pvals.append(prob_two_tailed)
