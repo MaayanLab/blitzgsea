@@ -61,7 +61,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     pbar = tqdm(x)
     for i in pbar:
         pbar.set_description("Parameter Calibration %s" % i)
-        es = np.array(get_peak_size(signature, estimate_parameters, i, permutations=permutations))
+        es = np.array(get_peak_size(signature, signature_map, i, permutations=permutations))
         pos = [x for x in es if x > 0]
         param = norm.fit(pos)
         means_pos.append(param[0])
