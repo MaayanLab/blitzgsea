@@ -11,31 +11,30 @@ from statsmodels.stats.multitest import multipletests
 
 
 def strip_gene_set(signature, gene_set):
-    signature_genes = set(signature.iloc[:,0])
+    signature_genes = set(signature.index)
     return [x for x in gene_set if x in signature_genes]
-    
-def enrichment_score(signature, gene_set):
-    rank_vector = signature.sort_values(1, ascending=False).set_index(0)
+
+def enrichment_score(signature, signature_map, gene_set):
     gs = set(gene_set)
-    hits = [i for i,x in enumerate(rank_vector.index) if x in gs]
-    hit_indicator = np.zeros(rank_vector.shape[0])
+    hits = [signature_map[x] for x in gs if x in signature_map.keys()]
+    hit_indicator = np.zeros(signature.shape[0])
     hit_indicator[hits] = 1
     no_hit_indicator = 1 - hit_indicator
     number_hits = len(hits)
-    number_miss = rank_vector.shape[0] - number_hits
-    sum_hit_scores = np.sum(np.abs(rank_vector.iloc[hits]))
-    norm_hit =  1.0/sum_hit_scores
-    norm_no_hit = 1.0/number_miss
-    running_sum = np.cumsum(hit_indicator * np.abs(rank_vector[1]) * float(norm_hit) - no_hit_indicator * float(norm_no_hit))
+    number_miss = signature.shape[0] - number_hits
+    sum_hit_scores = np.sum(np.abs(signature.iloc[hits]))
+    norm_hit =  float(1.0/sum_hit_scores)
+    norm_no_hit = float(1.0/number_miss)
+    running_sum = np.cumsum(hit_indicator * np.abs(signature.iloc[:,0]) * norm_hit - no_hit_indicator * norm_no_hit)
     nn = np.where(np.abs(running_sum)==np.max(np.abs(running_sum)))[0][0]
     es = running_sum[nn]
     return running_sum, es
 
-def get_peak_size(signature, size, permutations = 100):
+def get_peak_size(signature, signature_map, size, permutations = 100):
     es = []
     for _ in range(permutations):
-        rgenes = random.sample(list(signature.iloc[:,0]), size)
-        es.append(enrichment_score(signature, rgenes)[1])
+        rgenes = random.sample(list(signature.index), size)
+        es.append(enrichment_score(signature, signature_map, rgenes)[1])
     return es
 
 def loess_interpolation(x, y):
@@ -43,7 +42,7 @@ def loess_interpolation(x, y):
     xout, yout, wout = loess_1d(x, yl)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, library, permutations: int=1000, plotting: bool=False):
+def estimate_parameters(signature, signature_map, library, permutations: int=1000, plotting: bool=False):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -62,7 +61,7 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
     pbar = tqdm(x)
     for i in pbar:
         pbar.set_description("Parameter Calibration %s" % i)
-        es = np.array(get_peak_size(signature, i, permutations=permutations))
+        es = np.array(get_peak_size(signature, estimate_parameters, i, permutations=permutations))
         pos = [x for x in es if x > 0]
         param = norm.fit(pos)
         means_pos.append(param[0])
@@ -114,7 +113,12 @@ def estimate_parameters(signature, library, permutations: int=1000, plotting: bo
     return f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio
 
 def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False):
-    f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio = estimate_parameters(signature, library, permutations=permutations, plotting=plotting)
+    signature = signature.sort_values(1, ascending=False).set_index(0)
+    signature_map = {}
+    for i,h in enumerate(signature.index):
+        signature_map[h] = i
+
+    f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio = estimate_parameters(signature, signature_map, library, permutations=permutations, plotting=plotting)
     gsets = []
     ess = []
     pvals = []
@@ -131,7 +135,7 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
         gsize = len(gene_set)
         if gsize > 0:
             set_size.append(gsize)
-            rs, es = enrichment_score(signature, gene_set)
+            rs, es = enrichment_score(signature, signature_map, gene_set)
 
             pos_mean = f_mean_pos(gsize)
             pos_sd = f_sd_pos(gsize)
