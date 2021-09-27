@@ -5,10 +5,12 @@ from loess.loess_1d import loess_1d
 from collections import Counter
 from scipy import interpolate
 from scipy.stats import norm
+from scipy.stats import gamma
+from scipy.stats import kstest
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
-
+import warnings
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
@@ -52,65 +54,88 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     
     x = [1,2,3,4,5,8,10,12,14,18,22,26,30,35,60,100,200,500, set_sizes.iloc[:,0].max()]
          
-    means_pos = []
-    sd_pos = []
-    means_neg = []
-    sd_neg = []
+    alpha_pos = []
+    beta_pos = []
+    loc_pos = []
+
+    alpha_neg = []
+    beta_neg = []
+    loc_neg = []
+
     pos_ratio = []
+
+    ks_pos = []
+    ks_neg = []
     
     pbar = tqdm(x)
     for i in pbar:
         pbar.set_description("Parameter Calibration %s" % i)
         es = np.array(get_peak_size(signature, signature_map, i, permutations=permutations))
         pos = [x for x in es if x > 0]
-        param = norm.fit(pos)
-        means_pos.append(param[0])
-        sd_pos.append(param[1])
+        fit_alpha, fit_loc, fit_beta = gamma.fit(pos)
+        ks_pos.append(kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
+        alpha_pos.append(fit_alpha)
+        beta_pos.append(fit_beta)
+        loc_pos.append(fit_loc)
         neg = [x for x in es if x < 0]
-        param = norm.fit(neg)
-        means_neg.append(param[0])
-        sd_neg.append(param[1])
+        fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg))
+        ks_neg.append(kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
+        alpha_neg.append(fit_alpha)
+        beta_neg.append(fit_beta)
+        loc_neg.append(fit_loc)
         pos_ratio.append(len(pos)/(len(pos)+len(neg)))
     pbar.close()
 
     x = np.array(x, dtype=float)
     
-    f_mean_pos = loess_interpolation(x, means_pos)
-    f_sd_pos = loess_interpolation(x, sd_pos)
+    f_alpha_pos = loess_interpolation(x, alpha_pos)
+    f_beta_pos = loess_interpolation(x, beta_pos)
+    f_loc_pos = loess_interpolation(x, loc_pos)
     
-    f_mean_neg = loess_interpolation(x, means_neg)
-    f_sd_neg = loess_interpolation(x, sd_neg)
-    
+    f_alpha_neg = loess_interpolation(x, alpha_neg)
+    f_beta_neg = loess_interpolation(x, beta_neg)
+    f_loc_neg = loess_interpolation(x, loc_neg)
+
     f_pos_ratio = loess_interpolation(x, pos_ratio)
     
     if plotting:
         xx = np.linspace(min(x), max(x), 1000)
         
         plt.figure(0)
-        yy = f_mean_pos(xx)
+        yy = f_loc_pos(xx)
         plt.plot(xx, yy, '--', lw=3)
-        plt.plot(x, means_pos, 'ko')
+        plt.plot(x, loc_pos, 'ko')
         
-        yy = f_mean_neg(xx)
+        yy = f_loc_neg(xx)
         plt.plot(xx, yy, '--', lw=3, c="orange")
-        plt.plot(x, means_neg, 'o', c="coral")
+        plt.plot(x, loc_neg, 'o', c="coral")
 
-        yy = f_sd_pos(xx)
+        yy = f_alpha_pos(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3)
-        plt.plot(x, sd_pos, 'ko')
+        plt.plot(x, alpha_pos, 'ko')
         
-        yy = f_sd_neg(xx)
+        yy = f_alpha_neg(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3, c="orange")
-        plt.plot(x, sd_neg, 'o', c="coral")
+        plt.plot(x, alpha_neg, 'o', c="coral")
+
+        yy = f_beta_pos(xx)
+        plt.figure(1)
+        plt.plot(xx, yy, '--', lw=3)
+        plt.plot(x, beta_pos, 'ko')
+        
+        yy = f_beta_neg(xx)
+        plt.figure(1)
+        plt.plot(xx, yy, '--', lw=3, c="orange")
+        plt.plot(x, beta_neg, 'o', c="coral")
         
         yy = f_pos_ratio(xx)
         plt.figure(2)
         plt.plot(xx, yy, lw=3)
         plt.plot(x, pos_ratio, 'o', c="black")
         
-    return f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio
+    return f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
 def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False):
     signature = signature.sort_values(1, ascending=False).set_index(0)
@@ -118,7 +143,7 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_mean_pos, f_sd_pos, f_mean_neg, f_sd_neg, f_pos_ratio = estimate_parameters(signature, signature_map, library, permutations=permutations, plotting=plotting)
+    f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, plotting=plotting)
     gsets = []
     ess = []
     pvals = []
@@ -137,10 +162,12 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
             set_size.append(gsize)
             rs, es = enrichment_score(signature, signature_map, gene_set)
 
-            pos_mean = f_mean_pos(gsize)
-            pos_sd = f_sd_pos(gsize)
-            neg_mean = f_mean_neg(gsize)
-            neg_sd = f_sd_neg(gsize)
+            pos_alpha = f_alpha_pos(gsize)
+            pos_beta = f_beta_pos(gsize)
+            pos_loc = f_loc_pos(gsize)
+            neg_alpha = f_alpha_neg(gsize)
+            neg_beta = f_beta_neg(gsize)
+            neg_loc = f_loc_neg(gsize)
 
             pos_ratio = f_pos_ratio(gsize)
 
@@ -148,19 +175,19 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
             ess.append(es)
 
             if es > 0:
-                rv = norm(loc=pos_mean, scale=pos_sd)
+                rv = gamma(pos_alpha, scale=pos_beta, loc=pos_loc)
                 prob = rv.cdf(es)
                 prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
                 if prob_two_tailed == 1:
                     nes.append(0)
                 else:
-                    nes.append(norm.ppf(1-np.min([1,prob_two_tailed])))
+                    nes.append(gamma.ppf(1-np.min([1,prob_two_tailed])))
                 pvals.append(2*prob_two_tailed)
             else:
-                rv = norm(loc=neg_mean, scale=neg_sd)
-                prob = 1-rv.cdf(es)
+                rv = gamma(neg_alpha, scale=neg_beta, loc=neg_loc)
+                prob = 1-rv.cdf(-es)
                 prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
-                nes.append(norm.ppf(np.min([1,prob_two_tailed])))
+                nes.append(gamma.ppf(np.min([1,prob_two_tailed])))
                 pvals.append(2*prob_two_tailed)
     pbar.close()
 
@@ -170,5 +197,8 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int")]).T
     res.columns = ["Term", "es", "zscore", "pval", "sidak", "fdr","geneset_size"]
     res = res.set_index("Term")
+
+    if ks_pos < 0.05 or ks_neg < 0.05:
+        warnings.warn('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
     return res.sort_values("pval", key=abs, ascending=True)
