@@ -154,7 +154,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         plt.plot(xx, yy, lw=3)
         plt.plot(x, pos_ratio, 'o', c="black")
         
-    return f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, np.min(ks_pos), np.min(ks_neg)
+    return f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
 def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
