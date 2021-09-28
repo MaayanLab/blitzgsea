@@ -158,9 +158,13 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
 
 def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
+        print("low 1")
         warnings.warn('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
+        symmetric = True
     elif permutations < 500:
+        print("low 2")
         warnings.warn('Low numer of permutations can lead to inaccurate p-value estimation.')
+        symmetric = True
 
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature_map = {}
