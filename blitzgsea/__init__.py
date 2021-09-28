@@ -44,7 +44,7 @@ def loess_interpolation(x, y):
     xout, yout, wout = loess_1d(x, yl)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, plotting: bool=False):
+def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, calibration_anchors: int=10, plotting: bool=False):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -52,7 +52,11 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     set_sizes = pd.DataFrame(list(cc.items()),columns = ['set_size','count']).sort_values("set_size")
     set_sizes["cumsum"] = np.cumsum(set_sizes.iloc[:,1])
     
-    x = [1,2,3,4,5,8,10,12,14,18,22,26,30,35,60,100,200,500, set_sizes.iloc[:,0].max()]
+    ll = [len(library[l]) for l in library]
+    nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
+    x = sorted(list(set(np.append([1,4,6, np.max(ll)], nn).astype("int"))))
+
+    #x = [1,2,3,4,5,8,10,12,14,18,22,26,30,35,60,100,200,500, set_sizes.iloc[:,0].max()]
          
     alpha_pos = []
     beta_pos = []
@@ -156,7 +160,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         
     return f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
-def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
+def gsea(signature, library, permutations: int=100, calibration_anchors: int=15, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
         print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
@@ -169,7 +173,7 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, symmetric=symmetric, plotting=plotting)
+    f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=calibration_anchors, symmetric=symmetric, plotting=plotting)
     gsets = []
     ess = []
     pvals = []
