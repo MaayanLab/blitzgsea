@@ -44,7 +44,7 @@ def loess_interpolation(x, y):
     xout, yout, wout = loess_1d(x, yl)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric=symmetric, plotting: bool=False):
+def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, plotting: bool=False):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
