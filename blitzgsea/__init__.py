@@ -74,7 +74,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         pos = [x for x in es if x > 0]
         neg = [x for x in es if x < 0]
         if (len(neg) < 250 or len(pos) < 250) and not symmetric:
-            warnings.warn('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
+            print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
             symmetric = True
         if symmetric:
             aes = np.abs(es)
@@ -103,7 +103,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     pbar.close()
 
     if np.max(pos_ratio) > 1.5:
-        warnings.warn('Significant unbalance between positive and negative enrichment scores detected. Signature values are not centered close to 0.')
+        print('Significant unbalance between positive and negative enrichment scores detected. Signature values are not centered close to 0.')
 
     x = np.array(x, dtype=float)
     
@@ -158,12 +158,10 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
 
 def gsea(signature, library, permutations: int=100, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
-        print("low 1")
-        warnings.warn('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
+        print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
     elif permutations < 500:
-        print("low 2")
-        warnings.warn('Low numer of permutations can lead to inaccurate p-value estimation.')
+        print('Low numer of permutations can lead to inaccurate p-value estimation.')
         symmetric = True
 
     signature = signature.sort_values(1, ascending=False).set_index(0)
@@ -227,6 +225,6 @@ def gsea(signature, library, permutations: int=100, plotting: bool=False, verbos
     res = res.set_index("Term")
 
     if ks_pos < 0.05 or ks_neg < 0.05:
-        warnings.warn('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
+        print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
     return res.sort_values("pval", key=abs, ascending=True)
