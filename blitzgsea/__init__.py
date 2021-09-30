@@ -39,9 +39,9 @@ def get_peak_size(signature, signature_map, size, permutations = 100):
         es.append(enrichment_score(signature, signature_map, rgenes)[1])
     return es
 
-def loess_interpolation(x, y):
+def loess_interpolation(x, y, frac=0.5):
     yl = np.array(y)
-    xout, yout, wout = loess_1d(x, yl)
+    xout, yout, wout = loess_1d(x, yl, frac=frac)
     return interpolate.interp1d(xout, yout)
 
 def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, calibration_anchors: int=10, plotting: bool=False):
@@ -55,9 +55,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
     x = sorted(list(set(np.append([1,4,6, np.max(ll)], nn).astype("int"))))
-
-    #x = [1,2,3,4,5,8,10,12,14,18,22,26,30,35,60,100,200,500, set_sizes.iloc[:,0].max()]
-         
+    
     alpha_pos = []
     beta_pos = []
     loc_pos = []
@@ -82,7 +80,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
             symmetric = True
         if symmetric:
             aes = np.abs(es)
-            fit_alpha, fit_loc, fit_beta = gamma.fit(aes)
+            fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
             ks_pos.append(kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
             ks_neg.append(kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
             alpha_pos.append(fit_alpha)
@@ -92,13 +90,13 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
             beta_neg.append(fit_beta)
             loc_neg.append(fit_loc)
         else:
-            fit_alpha, fit_loc, fit_beta = gamma.fit(pos)
+            fit_alpha, fit_loc, fit_beta = gamma.fit(pos, floc=0)
             ks_pos.append(kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
             alpha_pos.append(fit_alpha)
             beta_pos.append(fit_beta)
             loc_pos.append(fit_loc)
             
-            fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg))
+            fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg), floc=0)
             ks_neg.append(kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
             alpha_neg.append(fit_alpha)
             beta_neg.append(fit_beta)
@@ -112,11 +110,11 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     x = np.array(x, dtype=float)
     
     f_alpha_pos = loess_interpolation(x, alpha_pos)
-    f_beta_pos = loess_interpolation(x, beta_pos)
+    f_beta_pos = loess_interpolation(x, beta_pos, frac=0.2)
     f_loc_pos = loess_interpolation(x, loc_pos)
     
     f_alpha_neg = loess_interpolation(x, alpha_neg)
-    f_beta_neg = loess_interpolation(x, beta_neg)
+    f_beta_neg = loess_interpolation(x, beta_neg, frac=0.2)
     f_loc_neg = loess_interpolation(x, loc_neg)
 
     f_pos_ratio = loess_interpolation(x, pos_ratio)
@@ -160,7 +158,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         
     return f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
-def gsea(signature, library, permutations: int=100, calibration_anchors: int=15, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
+def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
         print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
