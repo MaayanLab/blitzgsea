@@ -109,13 +109,12 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
 
     x = np.array(x, dtype=float)
     
+    # loc parameter is assumed 0 as fit locked it to 0
     f_alpha_pos = loess_interpolation(x, alpha_pos)
     f_beta_pos = loess_interpolation(x, beta_pos, frac=0.2)
-    f_loc_pos = loess_interpolation(x, loc_pos)
     
     f_alpha_neg = loess_interpolation(x, alpha_neg)
     f_beta_neg = loess_interpolation(x, beta_neg, frac=0.2)
-    f_loc_neg = loess_interpolation(x, loc_neg)
 
     f_pos_ratio = loess_interpolation(x, pos_ratio)
     
@@ -123,14 +122,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         xx = np.linspace(min(x), max(x), 1000)
         
         plt.figure(0)
-        yy = f_loc_pos(xx)
-        plt.plot(xx, yy, '--', lw=3)
-        plt.plot(x, loc_pos, 'ko')
         
-        yy = f_loc_neg(xx)
-        plt.plot(xx, yy, '--', lw=3, c="orange")
-        plt.plot(x, loc_neg, 'o', c="coral")
-
         yy = f_alpha_pos(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3)
@@ -156,7 +148,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         plt.plot(xx, yy, lw=3)
         plt.plot(x, pos_ratio, 'o', c="black")
         
-    return f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
+    return f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
 def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
@@ -171,7 +163,7 @@ def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_alpha_pos, f_beta_pos, f_loc_pos, f_alpha_neg, f_beta_neg, f_loc_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=calibration_anchors, symmetric=symmetric, plotting=plotting)
+    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=calibration_anchors, symmetric=symmetric, plotting=plotting)
     gsets = []
     ess = []
     pvals = []
@@ -192,10 +184,10 @@ def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20
 
             pos_alpha = f_alpha_pos(gsize)
             pos_beta = f_beta_pos(gsize)
-            pos_loc = f_loc_pos(gsize)
+            pos_loc = 0
             neg_alpha = f_alpha_neg(gsize)
             neg_beta = f_beta_neg(gsize)
-            neg_loc = f_loc_neg(gsize)
+            neg_loc = 0
 
             pos_ratio = f_pos_ratio(gsize)
 
