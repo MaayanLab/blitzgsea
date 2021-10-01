@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
 import warnings
+import multiprocessing
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
@@ -44,7 +45,7 @@ def loess_interpolation(x, y, frac=0.5):
     xout, yout, wout = loess_1d(x, yl, frac=frac)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, calibration_anchors: int=10, plotting: bool=False):
+def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, calibration_anchors: int=10, plotting: bool=False, processes=4):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -55,61 +56,35 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
     x = sorted(list(set(np.append([1,4,6, np.max(ll)], nn).astype("int"))))
-    
+
+    jobs = processes
+    with multiprocessing.Pool(jobs) as pool:
+        args = [(signature, signature_map, xx, permutations, symmetric) for xx in x]
+        results = list(tqdm(pool.imap(estimate_anchor_star, args), total=len(args)))
+
     alpha_pos = []
     beta_pos = []
-    loc_pos = []
-
+    ks_pos = []
     alpha_neg = []
     beta_neg = []
-    loc_neg = []
-
+    ks_neg = []
     pos_ratio = []
 
-    ks_pos = []
-    ks_neg = []
-    
-    pbar = tqdm(x)
-    for i in pbar:
-        pbar.set_description("Parameter Calibration %s" % i)
-        es = np.array(get_peak_size(signature, signature_map, i, permutations=permutations))
-        pos = [x for x in es if x > 0]
-        neg = [x for x in es if x < 0]
-        if (len(neg) < 250 or len(pos) < 250) and not symmetric:
-            print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
-            symmetric = True
-        if symmetric:
-            aes = np.abs(es)
-            fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
-            ks_pos.append(kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
-            ks_neg.append(kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
-            alpha_pos.append(fit_alpha)
-            beta_pos.append(fit_beta)
-            loc_pos.append(fit_loc)
-            alpha_neg.append(fit_alpha)
-            beta_neg.append(fit_beta)
-            loc_neg.append(fit_loc)
-        else:
-            fit_alpha, fit_loc, fit_beta = gamma.fit(pos, floc=0)
-            ks_pos.append(kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
-            alpha_pos.append(fit_alpha)
-            beta_pos.append(fit_beta)
-            loc_pos.append(fit_loc)
-            
-            fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg), floc=0)
-            ks_neg.append(kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1])
-            alpha_neg.append(fit_alpha)
-            beta_neg.append(fit_beta)
-            loc_neg.append(fit_loc)
-        pos_ratio.append(len(pos)/(len(pos)+len(neg)))
-    pbar.close()
+    for res in results:
+        f_alpha_pos, f_beta_pos, f_ks_pos, f_alpha_neg, f_beta_neg, f_ks_neg, f_pos_ratio = res
+        alpha_pos.append(f_alpha_pos)
+        beta_pos.append(f_beta_pos)
+        ks_pos.append(f_ks_pos)
+        alpha_neg.append(f_alpha_neg)
+        beta_neg.append(f_beta_neg)
+        ks_neg.append(f_ks_neg)
+        pos_ratio.append(f_pos_ratio)
 
     if np.max(pos_ratio) > 1.5:
         print('Significant unbalance between positive and negative enrichment scores detected. Signature values are not centered close to 0.')
 
     x = np.array(x, dtype=float)
     
-    # loc parameter is assumed 0 as fit locked it to 0
     f_alpha_pos = loess_interpolation(x, alpha_pos)
     f_beta_pos = loess_interpolation(x, beta_pos, frac=0.2)
     
@@ -150,7 +125,42 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
         
     return f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
-def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
+def estimate_anchor_star(args):
+    return estimate_anchor(*args)
+
+def estimate_anchor(signature, signature_map, set_size, permutations, symmetric):
+    es = np.array(get_peak_size(signature, signature_map, set_size, permutations=permutations))
+    pos = [x for x in es if x > 0]
+    neg = [x for x in es if x < 0]
+    if (len(neg) < 250 or len(pos) < 250) and not symmetric:
+        print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
+        symmetric = True
+    if symmetric:
+        aes = np.abs(es)
+        fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
+        ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+
+        alpha_pos = fit_alpha
+        beta_pos = fit_beta
+        
+        alpha_neg = fit_alpha
+        beta_neg = fit_beta
+    else:
+        fit_alpha, fit_loc, fit_beta = gamma.fit(pos, floc=0)
+        ks_pos = kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        alpha_pos = fit_alpha
+        beta_pos = fit_beta
+        
+        fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg), floc=0)
+        ks_neg = kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        alpha_neg = fit_alpha
+        beta_neg = fit_beta
+    pos_ratio = len(pos)/(len(pos)+len(neg))
+
+    return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
+
+def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, processes:int=6, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
         print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
@@ -163,7 +173,7 @@ def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=calibration_anchors, symmetric=symmetric, plotting=plotting)
+    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=calibration_anchors, processes=processes, symmetric=symmetric, plotting=plotting)
     gsets = []
     ess = []
     pvals = []
