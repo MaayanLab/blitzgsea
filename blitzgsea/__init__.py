@@ -160,7 +160,41 @@ def estimate_anchor(signature, signature_map, set_size, permutations, symmetric)
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
-def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, processes:int=6, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
+def probability_star(args):
+    return probability(*args)
+    
+def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio):
+    gsize = len(gene_set)
+    
+    rs, es = enrichment_score(signature, signature_map, gene_set)
+
+    pos_alpha = f_alpha_pos(gsize)
+    pos_beta = f_beta_pos(gsize)
+
+    neg_alpha = f_alpha_neg(gsize)
+    neg_beta = f_beta_neg(gsize)
+
+    pos_ratio = f_pos_ratio(gsize)
+
+    if es > 0:
+        rv = gamma(pos_alpha, scale=pos_beta, loc=0)
+        prob = rv.cdf(es)
+        prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
+        if prob_two_tailed == 1:
+            nes = 0
+        else:
+            nes = norm.ppf(1-np.min([1,prob_two_tailed]))
+        pval = 2*prob_two_tailed
+    else:
+        rv = gamma(neg_alpha, scale=neg_beta, loc=0)
+        prob = rv.cdf(-es)
+        prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
+        nes = norm.ppf(np.min([1,prob_two_tailed]))
+        pval = 2*prob_two_tailed
+
+    return gsize, es, nes, pval
+
+def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
     if permutations < 1000 and not symmetric:
         print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
@@ -175,52 +209,32 @@ def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20
 
     f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=calibration_anchors, processes=processes, symmetric=symmetric, plotting=plotting)
     gsets = []
+    
+    lib_keys = list(library.keys())
+    
+    params = []
+    keys = list(library.keys())
+    for k in keys:
+        stripped_set = strip_gene_set(signature, library[k])
+        if len(stripped_set) > 0:
+            gsets.append(k)
+            params.append((signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio))
+    
+    with multiprocessing.Pool(processes) as pool:
+        results = list(tqdm(pool.imap(probability_star, params), total=len(params)))
+    
     ess = []
     pvals = []
     nes = []
     set_size = []
 
-    lib_keys = list(library.keys())
-    pbar = tqdm(range(len(lib_keys)))
+    for res in results:
+        gsize, es, ne, pval = res
+        nes.append(ne)
+        ess.append(es)
+        pvals.append(pval)
+        set_size.append(gsize)
     
-    for gene_set_key_i in pbar:
-        gene_set_key = lib_keys[gene_set_key_i]
-        pbar.set_description("GSEA %s" % gene_set_key_i)
-        gene_set = strip_gene_set(signature, library[gene_set_key])
-        gsize = len(gene_set)
-        if gsize > 0:
-            set_size.append(gsize)
-            rs, es = enrichment_score(signature, signature_map, gene_set)
-
-            pos_alpha = f_alpha_pos(gsize)
-            pos_beta = f_beta_pos(gsize)
-            pos_loc = 0
-            neg_alpha = f_alpha_neg(gsize)
-            neg_beta = f_beta_neg(gsize)
-            neg_loc = 0
-
-            pos_ratio = f_pos_ratio(gsize)
-
-            gsets.append(gene_set_key)
-            ess.append(es)
-
-            if es > 0:
-                rv = gamma(pos_alpha, scale=pos_beta, loc=pos_loc)
-                prob = rv.cdf(es)
-                prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
-                if prob_two_tailed == 1:
-                    nes.append(0)
-                else:
-                    nes.append(norm.ppf(1-np.min([1,prob_two_tailed])))
-                pvals.append(2*prob_two_tailed)
-            else:
-                rv = gamma(neg_alpha, scale=neg_beta, loc=neg_loc)
-                prob = rv.cdf(-es)
-                prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
-                nes.append(norm.ppf(np.min([1,prob_two_tailed])))
-                pvals.append(2*prob_two_tailed)
-    pbar.close()
-
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
