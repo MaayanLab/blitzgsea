@@ -4,6 +4,8 @@
 
 This Python package provides a computationally performant <b>G</b>ene <b>S</b>et <b>E</b>nrichment <b>A</b>nalysis (GSEA) implementation of the pre-rank algorithm [1]. GSEApy was used as the reference for the running sum and enrichment score calculation [2]. The algorithm estimates the enrichment score (ES) distribution of the null model by fitting data to gamma distibutions instead of calculating permutations for each gene set. blitzGSEA calculates p-values with much higher accuracy than other reference implementations available in Python.
 
+Gene set libraries can directly be loaded from Enrichr (<a href="https://maayanlab.cloud/Enrichr" target="_blank">https://maayanlab.cloud/Enrichr</a>). For this use the `blitzgsea.enrichr.get_library()` function. All libraries can also be listed with `blitzgsea.enrichr.print_libraries()`.
+
 blitzGSEA provides plotting functions to generate publication ready figures similar to the original GSEA-P software.
 
 # Installation
@@ -52,31 +54,30 @@ The gene set library is a dictionary with the gene set names as key and lists of
 This short example will download two files (signature and gene set library). The gene set library consists of KEGG pathways and the signature is an example signature of differential gene expression of muscle samples from young and old donors. Differential gene expression was computed with Limma Voom.
 
 ```python
-import blitzgsea as bgsea
+import blitzgsea as blitz
 import urllib.request
 import pandas as pd
-
-# download GMT file
-url = "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=KEGG_2021_Human"
-urllib.request.urlretrieve(url, "KEGG_2021_Human.gmt")
 
 # download example GMT file from Enrichr
 url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
 urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
 
-# read GMT file and parse into dictionary
-library = bgsea.read_gmt("KEGG_2021_Human.gmt")
-
 # read signature as pandas dataframe
 signature = pd.read_csv("ageing_muscle_gtex.tsv")
 
+# list available gene set libraries in Enrichr
+blitz.enrichr.print_libraries()
+
+# use enrichr submodule to retrieve gene set library
+library = blitz.enrichr.get_library("KEGG_2021_Human")
+
 # run enrichment analysis
-result = bgsea.gsea(signature, library)
+result = blitz.gsea(signature, library)
 ```
 
 ### Optional Parameters
 
-The main function of blitz.gsea supports several optional parameters. The default parameters should work well for most use cases. 
+The main function of `blitzgsea.gsea()` supports several optional parameters. The default parameters should work well for most use cases. 
 
 | parameter name | type | default	| description |
 |:-----|:---------|:-------------|:------|
@@ -86,6 +87,7 @@ The main function of blitz.gsea supports several optional parameters. The defaul
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
+| `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
 
 
 
