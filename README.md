@@ -49,6 +49,8 @@ The gene set library is a dictionary with the gene set names as key and lists of
 
 ### Python example
 
+This short example will download two files (signature and gene set library). The gene set library consists of KEGG pathways and the signature is an example signature of differential gene expression of muscle samples from young and old donors. Differential gene expression was computed with Limma Voom.
+
 ```python
 import blitzgsea as bgsea
 import urllib.request
