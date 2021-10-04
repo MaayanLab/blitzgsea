@@ -14,6 +14,7 @@ import warnings
 import multiprocessing
 
 import blitzgsea.enrichr
+import blitzgsea.plot
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
@@ -35,9 +36,8 @@ def enrichment_score(signature, signature_map, gene_set):
     es = running_sum[nn]
     return running_sum, es
 
-def get_peak_size(signature, signature_map, size, permutations, seed):
+def get_peak_size(signature, signature_map, size, permutations):
     es = []
-    random.seed(seed)
     for _ in range(permutations):
         rgenes = random.sample(list(signature.index), size)
         es.append(enrichment_score(signature, signature_map, rgenes)[1])
@@ -48,7 +48,7 @@ def loess_interpolation(x, y, frac=0.5):
     xout, yout, wout = loess_1d(x, yl, frac=frac)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, signature_map, library, permutations: int=2000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, seed=0):
+def estimate_parameters(signature, signature_map, library, permutations: int=2000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, verbose=False):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -62,7 +62,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=200
 
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
-        args = [(signature, signature_map, xx, permutations, symmetric, seed) for xx in x]
+        args = [(signature, signature_map, xx, permutations, symmetric) for xx in x]
         results = list(tqdm(pool.imap(estimate_anchor_star, args), total=len(args)))
 
     alpha_pos = []
@@ -83,7 +83,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=200
         ks_neg.append(f_ks_neg)
         pos_ratio.append(f_pos_ratio)
 
-    if np.max(pos_ratio) > 1.5:
+    if np.max(pos_ratio) > 1.5 and verbose:
         print('Significant unbalance between positive and negative enrichment scores detected. Signature values are not centered close to 0.')
 
     x = np.array(x, dtype=float)
@@ -131,12 +131,11 @@ def estimate_parameters(signature, signature_map, library, permutations: int=200
 def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
-def estimate_anchor(signature, signature_map, set_size, permutations, symmetric, seed):
-    es = np.array(get_peak_size(signature, signature_map, set_size, permutations, seed))
+def estimate_anchor(signature, signature_map, set_size, permutations, symmetric):
+    es = np.array(get_peak_size(signature, signature_map, set_size, permutations))
     pos = [x for x in es if x > 0]
     neg = [x for x in es if x < 0]
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
-        print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
     if symmetric:
         aes = np.abs(es)
@@ -198,20 +197,26 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     return gsize, es, nes, pval
 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed=0):
+    if seed != -1:
+        random.seed(seed)
     signature.columns = [0,1]
     if permutations < 1000 and not symmetric:
-        print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
+        if verbose:
+            print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
     elif permutations < 500:
-        print('Low numer of permutations can lead to inaccurate p-value estimation.')
+        if verbose:
+            print('Low numer of permutations can lead to inaccurate p-value estimation. Consider increasing number of permutations.')
         symmetric = True
 
     signature = signature.sort_values(1, ascending=False).set_index(0)
+    signature = signature[~signature.index.duplicated(keep='first')]
+    
     signature_map = {}
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, seed=seed)
+    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose)
     gsets = []
     
     params = []
@@ -237,6 +242,9 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, processes:
         pvals.append(pval)
         set_size.append(gsize)
     
+    if not verbose:
+        np.seterr(divide = 'ignore')
+    
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
@@ -244,7 +252,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, processes:
     res.columns = ["Term", "es", "zscore", "pval", "sidak", "fdr","geneset_size"]
     res = res.set_index("Term")
 
-    if ks_pos < 0.05 or ks_neg < 0.05:
+    if (ks_pos < 0.05 or ks_neg < 0.05) and verbose:
         print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
     return res.sort_values("pval", key=abs, ascending=True)
