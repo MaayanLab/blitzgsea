@@ -59,7 +59,7 @@ url = "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=KEGG
 urllib.request.urlretrieve(url, "KEGG_2021_Human.gmt")
 
 # download example GMT file from Enrichr
-url = "https://github.com/MaayanLab/blitzgsea/blob/main/testing/ageing_muscle_gtex.tsv"
+url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
 urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
 
 # read GMT file and parse into dictionary
