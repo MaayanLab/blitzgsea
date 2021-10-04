@@ -117,3 +117,35 @@ def running_sum(signature, geneset, library, result=None, compact=False):
         ax1.tick_params(labelsize=16)
     plt.ion()
     return fig
+
+def top_table(signature, library, result, n=10):
+    sig = signature.sort_values(1, ascending=False).set_index(0)
+    sig = sig[~sig.index.duplicated(keep='first')]
+
+    plt.ioff()
+    fig = plt.figure(figsize=(5,0.5*n), frameon=False)
+    ax = fig.add_subplot(111)
+    fig.patch.set_visible(False)
+    plt.axis('off')
+
+    ax.vlines(x=[0.2,0.8], ymin=-0.1, ymax=1, color="black")
+    ln = np.linspace(-0.1,1,n+1)[::-1]
+    ax.hlines(y=ln, xmin=0, xmax=1, color="black")
+
+    ax.text(0.03, 1.03, "NES", fontsize=16)
+    ax.text(0.84, 1.03, "SET", fontsize=16)
+
+    for i in range(n):
+        ax.text(0.03, (ln[i]+ln[i+1])/2, "{:.3f}".format(result.iloc[i, 1]), verticalalignment='center')
+        ax.text(0.84, (ln[i]+ln[i+1])/2, result.index[i], verticalalignment='center')
+        
+        gs = set(library[result.index[i]])
+        hits = np.array([i for i,x in enumerate(sig.index) if x in gs])
+        hits = (hits/len(sig.index))*0.6+0.2
+        
+        if result.iloc[i, 1] > 0:
+            ax.vlines(hits, ymax=ln[i], ymin=ln[i+1], color="red", lw=0.5, alpha=0.3)
+        else:
+            ax.vlines(hits, ymax=ln[i], ymin=ln[i+1], color="blue", lw=0.5, alpha=0.3)
+    plt.ion()
+    return fig
