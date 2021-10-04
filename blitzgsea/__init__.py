@@ -198,6 +198,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     return gsize, es, nes, pval
 
 def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
+    signature.columns = [0,1]
     if permutations < 1000 and not symmetric:
         print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
         symmetric = True
