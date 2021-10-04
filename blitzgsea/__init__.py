@@ -13,7 +13,7 @@ from statsmodels.stats.multitest import multipletests
 import warnings
 import multiprocessing
 
-import enrichr
+import blitzgsea.enrichr
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
@@ -35,8 +35,9 @@ def enrichment_score(signature, signature_map, gene_set):
     es = running_sum[nn]
     return running_sum, es
 
-def get_peak_size(signature, signature_map, size, permutations = 100):
+def get_peak_size(signature, signature_map, size, permutations, seed):
     es = []
+    random.seed(seed)
     for _ in range(permutations):
         rgenes = random.sample(list(signature.index), size)
         es.append(enrichment_score(signature, signature_map, rgenes)[1])
@@ -47,7 +48,7 @@ def loess_interpolation(x, y, frac=0.5):
     xout, yout, wout = loess_1d(x, yl, frac=frac)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, signature_map, library, permutations: int=1000, symmetric: bool=False, calibration_anchors: int=10, plotting: bool=False, processes=4):
+def estimate_parameters(signature, signature_map, library, permutations: int=2000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, seed=0):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -61,7 +62,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
 
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
-        args = [(signature, signature_map, xx, permutations, symmetric) for xx in x]
+        args = [(signature, signature_map, xx, permutations, symmetric, seed) for xx in x]
         results = list(tqdm(pool.imap(estimate_anchor_star, args), total=len(args)))
 
     alpha_pos = []
@@ -130,8 +131,8 @@ def estimate_parameters(signature, signature_map, library, permutations: int=100
 def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
-def estimate_anchor(signature, signature_map, set_size, permutations, symmetric):
-    es = np.array(get_peak_size(signature, signature_map, set_size, permutations=permutations))
+def estimate_anchor(signature, signature_map, set_size, permutations, symmetric, seed):
+    es = np.array(get_peak_size(signature, signature_map, set_size, permutations, seed))
     pos = [x for x in es if x > 0]
     neg = [x for x in es if x < 0]
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
@@ -196,7 +197,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
 
     return gsize, es, nes, pval
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed=0):
     signature.columns = [0,1]
     if permutations < 1000 and not symmetric:
         print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
@@ -210,10 +211,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, processes:
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting)
+    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, seed=seed)
     gsets = []
-    
-    lib_keys = list(library.keys())
     
     params = []
     keys = list(library.keys())
