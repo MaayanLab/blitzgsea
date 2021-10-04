@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.1.",
     author="Alexander Lachmann",
     author_email="alexander.lachmann@mssm.edu",
-    description="Package for fast calculation of GSEA similar to prerank.",
+    description="Package for fast calculation of GSEA similar to prerank using gamma distribution approximation.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/maayanlab/blitzgsea",
@@ -19,7 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_data={
-        "prismx": ["data/*"]
+        "blitzgsea": ["data/*"]
     },
     include_package_data=True,
     install_requires=[
