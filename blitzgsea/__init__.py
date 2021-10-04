@@ -12,6 +12,9 @@ from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
 import warnings
 import multiprocessing
+from typing import List
+import re
+import itertools
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
@@ -246,3 +249,27 @@ def gsea(signature, library, permutations: int=2000, calibration_anchors: int=20
         print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
     return res.sort_values("pval", key=abs, ascending=True)
+
+def read_gmt(gmt_file: str, background_genes: List[str]=[], verbose=False):
+    file = open(gmt_file, 'r')
+    lines = file.readlines()
+    library = {}
+    background_set = {}
+    if len(background_genes) > 1:
+        background_genes = [x.upper() for x in background_genes]
+        background_set = set(background_genes)
+    for line in lines:
+        sp = line.strip().upper().split("\t")
+        sp2 = [re.sub(",.*", "",value) for value in sp[2:]]
+        sp2 = [x for x in sp2 if x] 
+        if len(background_genes) > 2:
+            geneset = list(set(sp2).intersection(background_set))
+            if len(geneset) > 0:
+                library[sp[0]] = geneset
+        else:
+            if len(sp2) > 0:
+                library[sp[0]] = sp2
+    ugenes = list(set(list(itertools.chain.from_iterable(library.values()))))
+    if verbose:
+        print("Library loaded. Library contains "+str(len(library))+" gene sets. "+str(len(ugenes))+" unique genes found.")
+    return library
