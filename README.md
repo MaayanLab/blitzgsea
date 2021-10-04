@@ -56,19 +56,18 @@ import blitzgsea as bgsea
 import urllib.request
 import pandas as pd
 
-# download GMT file
-url = "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=KEGG_2021_Human"
-urllib.request.urlretrieve(url, "KEGG_2021_Human.gmt")
-
 # download example GMT file from Enrichr
 url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
 urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
 
-# read GMT file and parse into dictionary
-library = bgsea.read_gmt("KEGG_2021_Human.gmt")
-
 # read signature as pandas dataframe
 signature = pd.read_csv("ageing_muscle_gtex.tsv")
+
+# list available gene set libraries in Enrichr
+bgsea.enrichr.print_libraries()
+
+# use enrichr submodule to retrieve gene set library
+library = bgsea.enrichr.get_library("KEGG_2021_Human")
 
 # run enrichment analysis
 result = bgsea.gsea(signature, library)
@@ -86,6 +85,7 @@ The main function of blitz.gsea supports several optional parameters. The defaul
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
+| `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
 
 
 
