@@ -12,7 +12,7 @@ def list_libraries():
     return(load_json(get_config()["LIBRARY_LIST_URL"])["library"])
 
 def load_library(library: str, overwrite: bool = False, verbose: bool = False) -> str:
-    if not os.exists(get_data_path()+library or overwrite):
+    if not os.path.exists(get_data_path()+library or overwrite):
         if verbose:
             print("Download Enrichr geneset library")
         urllib.request.urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library)
