@@ -47,10 +47,27 @@ The gene set library is a dictionary with the gene set names as key and lists of
 }
 ```
 
-Python
+Python example
 
 ```python
-import blitzGSEA as bgsea
+import blitzgsea as bgsea
+import urllib.request
+import pandas as pd
 
+# download GMT file
+url = "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=KEGG_2021_Human"
+urllib.request.urlretrieve(url, "KEGG_2021_Human.gmt")
+
+# download example GMT file from Enrichr
+url = "https://github.com/MaayanLab/blitzgsea/blob/main/testing/ageing_muscle_gtex.tsv"
+urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
+
+# read GMT file and parse into dictionary
+library = bgsea.read_gmt("KEGG_2021_Human.gmt")
+
+# read signature as pandas dataframe
+signature = pd.read_csv("ageing_muscle_gtex.tsv")
+
+# run enrichment analysis
 result = bgsea.gsea(signature, library)
 ```
