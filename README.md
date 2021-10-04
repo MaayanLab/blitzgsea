@@ -4,7 +4,7 @@
 
 This Python package provides a computationally performant <b>G</b>ene <b>S</b>et <b>E</b>nrichment <b>A</b>nalysis (GSEA) implementation of the pre-rank algorithm [1]. GSEApy was used as the reference for the running sum and enrichment score calculation [2]. The algorithm estimates the enrichment score (ES) distribution of the null model by fitting data to gamma distibutions instead of calculating permutations for each gene set. blitzGSEA calculates p-values with much higher accuracy than other reference implementations available in Python.
 
-Gene set libraries can directly be loaded from Enrichr (https://maayanlab.cloud/Enrichr). For this use the `blitzgsea.enrichr.get_library()` function. All libraries can also be listed with `blitzgsea.enrichr.print_libraries()`.
+Gene set libraries can directly be loaded from Enrichr ([https://maayanlab.cloud/Enrichr](https://maayanlab.cloud/Enrichr){:target="_blank"}). For this use the `blitzgsea.enrichr.get_library()` function. All libraries can also be listed with `blitzgsea.enrichr.print_libraries()`.
 
 blitzGSEA provides plotting functions to generate publication ready figures similar to the original GSEA-P software.
 
