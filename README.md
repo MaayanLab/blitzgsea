@@ -2,13 +2,13 @@
 
 # blitzGSEA Introduction
 
-This Python package provides a computationally performant <b>G</b>ene <b>S</b>et <b>E</b>nrichment <b>A</b>nalysis (GSEA) implementation of the pre-rank algorithm [1]. The algorithm estimates the enrichment score (ES) distribution of the null model by fitting data to gamma distibutions instead of calculating permutations for each gene set. blitzGSEA calculates p-values with much higher accuracy than other reference implementations available in Python.
+This Python package provides a computationally performant <b>G</b>ene <b>S</b>et <b>E</b>nrichment <b>A</b>nalysis (GSEA) implementation of the pre-rank algorithm [1]. GSEApy was used as the reference for the running sum and enrichment score calculation [2]. The algorithm estimates the enrichment score (ES) distribution of the null model by fitting data to gamma distibutions instead of calculating permutations for each gene set. blitzGSEA calculates p-values with much higher accuracy than other reference implementations available in Python.
 
-blitzGSEA provides plotting functions to generate publication ready figures similar to the oroginal GSEA-P software.
+blitzGSEA provides plotting functions to generate publication ready figures similar to the original GSEA-P software.
 
 # Installation
 
-blitzGSEA is currently only available as a Python package in this GitHub repository. You can install the blitzGSEA Python package and its depensencies through pip by using the following command:
+blitzGSEA is currently only available as a Python package in this GitHub repository. You can install the blitzGSEA Python package and its dependencies through pip by using the following command:
 
 ```
 $ pip install git+https://github.com/MaayanLab/blitzgsea.git
@@ -47,7 +47,7 @@ The gene set library is a dictionary with the gene set names as key and lists of
 }
 ```
 
-Python example
+### Python example
 
 ```python
 import blitzgsea as bgsea
@@ -71,3 +71,9 @@ signature = pd.read_csv("ageing_muscle_gtex.tsv")
 # run enrichment analysis
 result = bgsea.gsea(signature, library)
 ```
+
+# References
+
+[1] Subramanian, Aravind, Heidi Kuehn, Joshua Gould, Pablo Tamayo, and Jill P. Mesirov. "GSEA-P: a desktop application for Gene Set Enrichment Analysis." Bioinformatics 23, no. 23 (2007): 3251-3253.
+
+[2] Fang, Z., A. Wolf, Y. Liao, A. McKay, F. Fröhlich, J. Kimmel, L. Xiaohui, and sorrge. "zqfang/gseapy: gseapy-v0. 10.3." (2021).
