@@ -74,6 +74,21 @@ signature = pd.read_csv("ageing_muscle_gtex.tsv")
 result = bgsea.gsea(signature, library)
 ```
 
+### Optional Parameters
+
+The main function of blitz.gsea supports several optional parameters. The default parameters should work well for most use cases. 
+
+| parameter name | type | default	| description |
+|:-----|:---------|:-------------|:------|
+| `permutations`	| int | 2000	| Number of randomized permutations to estimate ES distributions. |
+| `anchors`	| int | 20 | Number of gene set size distributions calculated. Remaining are interpolated. |
+| `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
+| `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
+| `plotting`| bool | False | Plot estimated anchor parametes. |
+| `verbose` | bool | False | Toggle additonal output. |
+
+
+
 # References
 
 [1] Subramanian, Aravind, Heidi Kuehn, Joshua Gould, Pablo Tamayo, and Jill P. Mesirov. "GSEA-P: a desktop application for Gene Set Enrichment Analysis." Bioinformatics 23, no. 23 (2007): 3251-3253.
