@@ -116,6 +116,7 @@ def running_sum(signature, geneset, library, result=None, compact=False):
         plt.ylabel("Ranked list metric", fontsize=16)
         ax1.tick_params(labelsize=16)
     plt.ion()
+    fig.patch.set_facecolor('white')
     return fig
 
 def top_table(signature, library, result, n=10):
@@ -147,5 +148,6 @@ def top_table(signature, library, result, n=10):
             ax.vlines(hits, ymax=ln[i], ymin=ln[i+1], color="red", lw=0.5, alpha=0.3)
         else:
             ax.vlines(hits, ymax=ln[i], ymin=ln[i+1], color="blue", lw=0.5, alpha=0.3)
+    fig.patch.set_facecolor('white')
     plt.ion()
     return fig
