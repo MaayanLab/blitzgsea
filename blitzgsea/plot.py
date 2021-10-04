@@ -5,7 +5,7 @@ from matplotlib.patches import Rectangle
 import blitzgsea as blitz
 
 def running_sum(signature, geneset, library, result=None, compact=False):
-    
+    plt.ioff()
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
@@ -115,4 +115,5 @@ def running_sum(signature, geneset, library, result=None, compact=False):
         plt.xlabel("Rank in Ordered Dataset", fontsize=16)
         plt.ylabel("Ranked list metric", fontsize=16)
         ax1.tick_params(labelsize=16)
+    plt.ion()
     return fig
