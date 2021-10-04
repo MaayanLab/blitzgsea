@@ -89,6 +89,55 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `verbose` | bool | False | Toggle additonal output. |
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
 
+### Plotting enrichment results
+
+blitzGSEA supports several plotting functions. `blitzgsea.plot.running_sum()` and `blitzgsea.plot.top_table` can be used after enrichment has been performed. `blitzgsea.plot.running_sum()` shows the running sum of an individual gene set. It has a `compact` mode in which the image will be more readable if small. `blitzgsea.plot.top_table` shows the top `n` enriched gene sets and displays the results in a table, with normalized enrichment score (NES) and the distribution of hits relative to the gene ranking of the signature.
+
+### Example
+```python
+
+import blitzgsea as blitz
+import urllib.request
+import pandas as pd
+
+# download example GMT file from Enrichr
+url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
+urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
+
+# read signature as pandas dataframe
+signature = pd.read_csv("ageing_muscle_gtex.tsv")
+
+# list available gene set libraries in Enrichr
+blitz.enrichr.print_libraries()
+
+# use enrichr submodule to retrieve gene set library
+library = blitz.enrichr.get_library("KEGG_2021_Human")
+
+# run enrichment analysis
+result = blitz.gsea(signature, library)
+
+# plot the enrichment results and save to pdf
+fig = blitz.plot.running_sum(signature, "CELL ADHESION MOLECULES", library, result=result, compact=False)
+fig.savefig("running_sum.png", bbox_inches='tight')
+
+fig_compact = blitz.plot.running_sum(signature, "CELL ADHESION MOLECULES", library, result=result, compact=True)
+fig_compact.savefig("running_sum_compact.png", bbox_inches='tight')
+
+fig_table = blitz.plot.top_table(signature, library, result, n=15)
+fig_table.savefig("top_table.png", bbox_inches='tight')
+
+```
+
+The resulting plots will look like the examples below:
+
+#### running_sum.pdf
+<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/running_sum.png" width=300>
+
+#### running_sum_compact.pdf
+<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/running_sum_compact.png" width=300>
+
+#### top_table.pdf
+<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/top_table.png" width=300>
 
 
 # References
