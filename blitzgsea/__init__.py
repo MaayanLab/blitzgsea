@@ -13,8 +13,6 @@ from statsmodels.stats.multitest import multipletests
 import warnings
 import multiprocessing
 
-import enrichr
-
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
     return [x for x in gene_set if x in signature_genes]
