@@ -54,7 +54,7 @@ The gene set library is a dictionary with the gene set names as key and lists of
 This short example will download two files (signature and gene set library). The gene set library consists of KEGG pathways and the signature is an example signature of differential gene expression of muscle samples from young and old donors. Differential gene expression was computed with Limma Voom.
 
 ```python
-import blitzgsea as bgsea
+import blitzgsea as blitz
 import urllib.request
 import pandas as pd
 
@@ -66,18 +66,18 @@ urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
 signature = pd.read_csv("ageing_muscle_gtex.tsv")
 
 # list available gene set libraries in Enrichr
-bgsea.enrichr.print_libraries()
+blitz.enrichr.print_libraries()
 
 # use enrichr submodule to retrieve gene set library
-library = bgsea.enrichr.get_library("KEGG_2021_Human")
+library = blitz.enrichr.get_library("KEGG_2021_Human")
 
 # run enrichment analysis
-result = bgsea.gsea(signature, library)
+result = blitz.gsea(signature, library)
 ```
 
 ### Optional Parameters
 
-The main function of blitz.gsea supports several optional parameters. The default parameters should work well for most use cases. 
+The main function of `blitzgsea.gsea()` supports several optional parameters. The default parameters should work well for most use cases. 
 
 | parameter name | type | default	| description |
 |:-----|:---------|:-------------|:------|
