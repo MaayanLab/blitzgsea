@@ -18,7 +18,7 @@ $ pip install git+https://github.com/MaayanLab/blitzgsea.git
 
 # Run enrichment analysis using blitzGSEA
 
-blitzGSEA depends on two input files. 1) a gene signature and 2) a gene set library. The gene set library can be any signature with genes and weights associated with them. The signature should be a pandas dataframe with two columns [0,1]. The first column should contain the gene ids (matching the gene ids in the gene set library).
+blitzGSEA depends on two input files. 1) a gene signature and 2) a gene set library. The gene set library is a dictionary with the name of the gene set as key and a list of gene ids as values. Gene set libraries can be loaded directly from Enrichr. The signature should be a pandas dataframe with two columns [0,1]. The first column should contain the gene ids (matching the gene ids in the gene set library).
 
 | index | 0	| 1 |
 |:-----|:-------------:|------:|
