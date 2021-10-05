@@ -63,7 +63,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=200
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
         args = [(signature, signature_map, xx, permutations, symmetric) for xx in x]
-        results = list(tqdm(pool.imap(estimate_anchor_star, args), total=len(args)))
+        results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args)))
 
     alpha_pos = []
     beta_pos = []
@@ -228,7 +228,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             params.append((signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio))
     
     with multiprocessing.Pool(processes) as pool:
-        results = list(tqdm(pool.imap(probability_star, params), total=len(params)))
+        results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
     
     ess = []
     pvals = []
