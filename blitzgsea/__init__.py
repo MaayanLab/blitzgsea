@@ -38,7 +38,7 @@ def enrichment_score(signature, signature_map, gene_set):
 
 def get_peak_size(signature, signature_map, size, permutations, seed):
     es = []
-    random.seed(0)
+    random.seed(seed)
     for _ in range(permutations):
         rgenes = random.sample(list(signature.index), size)
         es.append(enrichment_score(signature, signature_map, rgenes)[1])
@@ -199,8 +199,8 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed: int=0):
     if seed == -1:
-        seed = random.randint(-100000000, 1000000000)
-    random.seed(seed)
+        seed = random.randint(-10000000, 100000000)
+    
     signature.columns = [0,1]
     if permutations < 1000 and not symmetric:
         if verbose:
