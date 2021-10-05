@@ -6,7 +6,7 @@ This Python package provides a computationally performant <b>G</b>ene <b>S</b>et
 
 Gene set libraries can directly be loaded from Enrichr (<a href="https://maayanlab.cloud/Enrichr" target="_blank">https://maayanlab.cloud/Enrichr</a>). For this use the `blitzgsea.enrichr.get_library()` function. All libraries can also be listed with `blitzgsea.enrichr.print_libraries()`.
 
-blitzGSEA provides plotting functions to generate publication ready figures similar to the original GSEA-P software.
+blitzGSEA provides plotting functions to generate publication ready figures similar to the original GSEA-P software. `blitzgsea.plot.running_sum()` plots an enrichment plot for a single gene set and `blitzgsea.plot.top_table()` plots the top `n` gene sets in a compact table. 
 
 # Installation
 
