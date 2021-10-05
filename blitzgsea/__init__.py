@@ -196,7 +196,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
 
     return gsize, es, nes, pval
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed=0):
     if seed != -1:
         random.seed(seed)
     signature.columns = [0,1]
@@ -223,7 +223,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, processes:
     keys = list(library.keys())
     for k in keys:
         stripped_set = strip_gene_set(signature, library[k])
-        if len(stripped_set) > 0:
+        if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
             params.append((signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio))
     
