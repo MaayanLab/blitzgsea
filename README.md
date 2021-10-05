@@ -82,6 +82,8 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | parameter name | type | default	| description |
 |:-----|:---------|:-------------|:------|
 | `permutations`	| int | 2000	| Number of randomized permutations to estimate ES distributions. |
+| `min_size` | int | 5 | Minimum number of genes in geneset. |
+| `max_size` | int | Inf | Maximal number of genes in gene set. |
 | `anchors`	| int | 20 | Number of gene set size distributions calculated. Remaining are interpolated. |
 | `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
