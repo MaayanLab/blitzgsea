@@ -249,7 +249,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     sidak_values = multipletests(pvals, method="sidak")[1]
 
     res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int")]).T
-    res.columns = ["Term", "es", "zscore", "pval", "sidak", "fdr","geneset_size"]
+    res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size"]
     res = res.set_index("Term")
 
     if (ks_pos < 0.05 or ks_neg < 0.05) and verbose:
