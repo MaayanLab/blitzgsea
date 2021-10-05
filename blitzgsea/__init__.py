@@ -199,7 +199,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed: int=0):
     if seed == -1:
-        seed = random.randint(0, np.inf)
+        seed = random.randint(-100000000, 1000000000)
     random.seed(seed)
     signature.columns = [0,1]
     if permutations < 1000 and not symmetric:
