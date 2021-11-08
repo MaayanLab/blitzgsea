@@ -41,14 +41,14 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     if not result is None:
         if es > 0:
             if compact:
-                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"zscore"]), size=25, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='bottom', zorder=100)
+                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"nes"]), size=25, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='bottom', zorder=100)
             else:
-                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"zscore"]), size=20, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='bottom', zorder=100)
+                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"nes"]), size=20, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='bottom', zorder=100)
         else:
             if compact:
-                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"zscore"]), size=25, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='top', zorder=100)
+                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"nes"]), size=25, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='top', zorder=100)
             else:
-                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"zscore"]), size=20, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='top', zorder=100)
+                ax1.text(len(running_sum)/30, 0, "NES="+"{:.3f}".format(result.loc[geneset,"nes"]), size=20, bbox={'facecolor':'white','alpha':0.8,'edgecolor':'none','pad':1}, ha='left', va='top', zorder=100)
     else:
         if es > 0:
             if compact:
