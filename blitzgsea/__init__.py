@@ -15,7 +15,7 @@ import multiprocessing
 
 from mpmath import mp
 from mpmath import mpf
-from distributions.normal import invcdf
+from mpmath.distributions.normal import invcdf
 
 import blitzgsea.enrichr
 import blitzgsea.plot
