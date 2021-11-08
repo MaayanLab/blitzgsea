@@ -193,22 +193,16 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     pos_ratio = f_pos_ratio(gsize)
 
     if es > 0:
-        rv = gamma(pos_alpha, scale=pos_beta, loc=0)
-        prob = rv.cdf(es)
         prob = gammacdf(es, float(pos_alpha), float(pos_beta))
         prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
         if prob_two_tailed == 1:
             nes = 0
         else:
-            #nes = norm.ppf(1-np.min([1,prob_two_tailed]))
             nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
     else:
-        rv = gamma(neg_alpha, scale=neg_beta, loc=0)
-        prob = rv.cdf(-es)
         prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
         prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
-        #nes = norm.ppf(np.min([1,prob_two_tailed]))
         nes = invcdf(mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
 
