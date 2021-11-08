@@ -14,7 +14,8 @@ import warnings
 import multiprocessing
 
 from mpmath import mp
-from mpmath import *
+from mpmath import mpf
+from distributions.normal import invcdf
 
 import blitzgsea.enrichr
 import blitzgsea.plot
@@ -22,8 +23,6 @@ import blitzgsea.plot
 from importlib import reload
 reload(blitzgsea.enrichr)
 reload(blitzgsea.plot)
-
-mp.dps = 1000
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
