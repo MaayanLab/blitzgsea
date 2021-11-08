@@ -13,12 +13,18 @@ from statsmodels.stats.multitest import multipletests
 import warnings
 import multiprocessing
 
+from mpmath import mp
+from mpmath import *
+
 import blitzgsea.enrichr
 import blitzgsea.plot
 
 from importlib import reload
 reload(blitzgsea.enrichr)
 reload(blitzgsea.plot)
+
+mp.dps = 1000
+mp.prec = 1000
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
@@ -190,13 +196,15 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
         if prob_two_tailed == 1:
             nes = 0
         else:
-            nes = norm.ppf(1-np.min([1,prob_two_tailed]))
+            #nes = norm.ppf(1-np.min([1,prob_two_tailed]))
+            nes = mpsci.distributions.normal.invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
     else:
         rv = gamma(neg_alpha, scale=neg_beta, loc=0)
         prob = rv.cdf(-es)
         prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
-        nes = norm.ppf(np.min([1,prob_two_tailed]))
+        #nes = norm.ppf(np.min([1,prob_two_tailed]))
+        nes = mpsci.distributions.normal.invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
 
     return gsize, es, nes, pval
