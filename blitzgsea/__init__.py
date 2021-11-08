@@ -13,10 +13,6 @@ from statsmodels.stats.multitest import multipletests
 import warnings
 import multiprocessing
 
-from mpmath import mp
-from mpmath import mpf
-from mpmath.distributions.normal import invcdf
-
 import blitzgsea.enrichr
 import blitzgsea.plot
 
