@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="blitzgsea",
-    version="1.0.11",
+    version="1.0.12",
     author="Alexander Lachmann",
     author_email="alexander.lachmann@mssm.edu",
     description="Package for fast calculation of GSEA similar to prerank using gamma distribution approximation.",
@@ -30,6 +30,7 @@ setuptools.setup(
         'loess',
         'tqdm',
         'statsmodels',
+        'mpmath',
         'mpsci @ git+https://github.com/WarrenWeckesser/mpsci.git'
     ],
     python_requires='>=3.6',

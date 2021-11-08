@@ -13,12 +13,17 @@ from statsmodels.stats.multitest import multipletests
 import warnings
 import multiprocessing
 
+from mpmath import mp
+from mpmath import *
+
 import blitzgsea.enrichr
 import blitzgsea.plot
 
 from importlib import reload
 reload(blitzgsea.enrichr)
 reload(blitzgsea.plot)
+
+mp.dps = 1000
 
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
