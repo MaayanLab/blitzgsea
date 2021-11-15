@@ -29,6 +29,7 @@ reload(blitzgsea.plot)
 mp.dps = 1000
 mp.prec = 1000
 
+
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
     return [x for x in gene_set if x in signature_genes]
@@ -107,7 +108,9 @@ def estimate_parameters(signature, signature_map, library, permutations: int=200
     
     f_alpha_neg = loess_interpolation(x, alpha_neg)
     f_beta_neg = loess_interpolation(x, beta_neg, frac=0.2)
-    
+
+    # fix issue with numeric instability
+    pos_ratio = pos_ratio - np.abs(0.0001*np.random.randn(len(pos_ratio)))
     f_pos_ratio = loess_interpolation(x, pos_ratio)
     
     if plotting:
