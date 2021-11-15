@@ -107,7 +107,7 @@ def estimate_parameters(signature, signature_map, library, permutations: int=200
     
     f_alpha_neg = loess_interpolation(x, alpha_neg)
     f_beta_neg = loess_interpolation(x, beta_neg, frac=0.2)
-
+    
     f_pos_ratio = loess_interpolation(x, pos_ratio)
     
     if plotting:
