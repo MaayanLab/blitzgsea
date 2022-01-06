@@ -197,8 +197,10 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, signature_map, gene_set)
-    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
-    print(legenes)
+    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
+    #print(legenes)
+    legenes = ""
+
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
 
