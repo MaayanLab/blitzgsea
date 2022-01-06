@@ -29,7 +29,6 @@ reload(blitzgsea.plot)
 mp.dps = 1000
 mp.prec = 1000
 
-
 def strip_gene_set(signature, gene_set):
     signature_genes = set(signature.index)
     return [x for x in gene_set if x in signature_genes]
@@ -49,6 +48,18 @@ def enrichment_score(signature, signature_map, gene_set):
     nn = np.where(np.abs(running_sum)==np.max(np.abs(running_sum)))[0][0]
     es = running_sum[nn]
     return running_sum, es
+
+def get_leading_edge(runningsum, signature, gene_set, signature_map):
+    gs = set(gene_set)
+    hits = [signature_map[x] for x in gs if x in signature_map.keys()]
+    rmax = np.argmax(runningsum)
+    rmin = np.argmin(runningsum)
+    lgenes = []
+    if rmax > np.abs(rmin):
+        lgenes = set(hits).intersection(set(range(rmax)))
+    else:
+        lgenes = set(hits).intersection(set(range(rmin, len(runningsum))))
+    return ",".join(signature.index[lgenes])
 
 def get_peak_size(signature, signature_map, size, permutations, seed):
     es = []
@@ -186,6 +197,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, signature_map, gene_set)
+    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
 
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
@@ -209,9 +221,9 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
         nes = invcdf(mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
 
-    return gsize, es, nes, pval
+    return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed: int=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, legenes: bool=False, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
     
@@ -250,13 +262,15 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     pvals = []
     nes = []
     set_size = []
+    legenes = []
 
     for res in results:
-        gsize, es, ne, pval = res
+        gsize, es, ne, pval, legene = res
         nes.append(ne)
         ess.append(es)
         pvals.append(float(pval))
         set_size.append(gsize)
+        legenes.append(legene)
     
     if not verbose:
         np.seterr(divide = 'ignore')
@@ -264,8 +278,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
-    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int")]).T
-    res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size"]
+    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legenes)]).T
+    res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
     res = res.set_index("Term")
 
     if (ks_pos < 0.05 or ks_neg < 0.05) and verbose:
