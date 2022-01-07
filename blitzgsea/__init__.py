@@ -168,7 +168,7 @@ def estimate_anchor(signature, signature_map, set_size, permutations, symmetric,
         aes = np.abs(es)
         fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
         ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
-        ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        ks_neg = ks_pos
 
         alpha_pos = fit_alpha
         beta_pos = fit_beta
@@ -196,13 +196,14 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, signature_map, gene_set)
-    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
+    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
+    legenes = ""
 
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
 
-    neg_alpha = f_alpha_neg(gsize)
-    neg_beta = f_beta_neg(gsize)
+    #neg_alpha = f_alpha_neg(gsize)
+    #neg_beta = f_beta_neg(gsize)
 
     pos_ratio = f_pos_ratio(gsize)
 
@@ -222,7 +223,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed: int=0):
+def gsea(signature, library, permutations: int=1000, anchors: int=12, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
     
