@@ -222,7 +222,7 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=False, seed: int=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
     
