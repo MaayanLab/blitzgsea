@@ -197,8 +197,6 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     
     rs, es = enrichment_score(signature, signature_map, gene_set)
     legenes = get_leading_edge(rs, signature, gene_set, signature_map)
-    #print(legenes)
-    #legenes = ""
 
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
@@ -267,6 +265,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
     for res in results:
         gsize, es, ne, pval, legene = res
+        print(legene)
         nes.append(ne)
         ess.append(es)
         pvals.append(float(pval))
