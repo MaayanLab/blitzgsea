@@ -18,7 +18,6 @@ from mpmath import mpf
 from mpsci.distributions.normal import invcdf
 from mpsci.distributions.gamma import cdf as gammacdf
 
-
 import blitzgsea.enrichr
 import blitzgsea.plot
 
@@ -55,11 +54,11 @@ def get_leading_edge(runningsum, signature, gene_set, signature_map):
     rmax = np.argmax(runningsum)
     rmin = np.argmin(runningsum)
     lgenes = []
-    if rmax > np.abs(rmin):
+    if runningsum[rmax] > np.abs(runningsum[rmin]):
         lgenes = set(hits).intersection(set(range(rmax)))
     else:
         lgenes = set(hits).intersection(set(range(rmin, len(runningsum))))
-    return ",".join(signature.index[lgenes])
+    return ",".join(signature.index[list(lgenes)])
 
 def get_peak_size(signature, signature_map, size, permutations, seed):
     es = []
@@ -197,9 +196,9 @@ def probability(signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_a
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, signature_map, gene_set)
-    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
+    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
     #print(legenes)
-    legenes = ""
+    #legenes = ""
 
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
