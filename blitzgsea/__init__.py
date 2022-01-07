@@ -265,7 +265,6 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
     for res in results:
         gsize, es, ne, pval, legene = res
-        print(legene)
         nes.append(ne)
         ess.append(es)
         pvals.append(float(pval))
