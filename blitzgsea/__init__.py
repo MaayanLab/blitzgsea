@@ -153,7 +153,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
         plt.plot(xx, yy, lw=3)
         plt.plot(x, pos_ratio, 'o', c="black")
         
-    return f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
+    return f_alpha_pos, f_beta_pos, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 
 def estimate_anchor_star(args):
     return estimate_anchor(*args)
@@ -192,12 +192,11 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
 def probability_star(args):
     return probability(*args)
     
-def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio):
+def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_pos_ratio):
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, abs_signature, signature_map, gene_set)
-    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
-    legenes = ""
+    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
 
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
@@ -243,7 +242,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
+    f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
     
     params = []
@@ -252,7 +251,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         stripped_set = strip_gene_set(signature, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
-            params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_alpha_neg, f_beta_neg, f_pos_ratio))
+            params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
     
     with multiprocessing.Pool(processes) as pool:
         results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
