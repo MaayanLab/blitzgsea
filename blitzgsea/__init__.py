@@ -44,7 +44,7 @@ def enrichment_score(signature, signature_map, gene_set):
     norm_hit =  float(1.0/sum_hit_scores)
     norm_no_hit = float(1.0/number_miss)
     running_sum = np.cumsum(hit_indicator * np.abs(signature.iloc[:,0]) * norm_hit - no_hit_indicator * norm_no_hit)
-    nn = np.where(np.abs(running_sum)==np.max(np.abs(running_sum)))[0][0]
+    nn = np.argmax(np.abs(running_sum))
     es = running_sum[nn]
     return running_sum, es
 
