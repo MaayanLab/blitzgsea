@@ -205,7 +205,6 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     pos_ratio = f_pos_ratio(gsize)
     if es > 0:
-        print([es, float(pos_alpha), float(pos_beta)])
         prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
         if prob > 0.95:
             prob = gammacdf(es, float(pos_alpha), float(pos_beta))
