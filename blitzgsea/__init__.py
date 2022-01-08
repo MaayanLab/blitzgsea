@@ -261,7 +261,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
             gsize = len(stripped_set)
-            rr, es = enrichment_score(signature, abs_signature, signature_map, stripped_set)
+            rs, es = enrichment_score(signature, abs_signature, signature_map, stripped_set)
             legenes = get_leading_edge(rs, signature, stripped_set, signature_map)
 
             pos_alpha = f_alpha_pos(gsize)
@@ -304,7 +304,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             pvals.append(float(pval))
             set_size.append(gsize)
             legenes.append(legenes)
-    
+
     if not verbose:
         np.seterr(divide = 'ignore')
     
