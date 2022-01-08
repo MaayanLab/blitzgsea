@@ -198,15 +198,16 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, abs_signature, signature_map, gene_set)
-    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
+    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
 
-    pos_alpha = f_alpha_pos(gsize)
-    pos_beta = f_beta_pos(gsize)
-    pos_ratio = f_pos_ratio(gsize)
+    #pos_alpha = f_alpha_pos(gsize)
+    #pos_beta = f_beta_pos(gsize)
+    #pos_ratio = f_pos_ratio(gsize)
 
     nes = 0
     pval = 1
-    
+    legenes = ""
+
     return gsize, es, nes, pval, legenes
 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
