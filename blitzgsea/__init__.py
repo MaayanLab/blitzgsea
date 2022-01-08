@@ -269,7 +269,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     params = []
     keys = list(library.keys())
     for k in keys:
-        stripped_set = strip_gene_set(signature, library[k])
+        #stripped_set = strip_gene_set(signature, library[k])
+        stripped_set = library[k]
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
             params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
