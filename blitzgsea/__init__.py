@@ -1,4 +1,5 @@
 import random
+import time
 import numpy as np
 import pandas as pd
 from loess.loess_1d import loess_1d
