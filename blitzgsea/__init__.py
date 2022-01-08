@@ -257,7 +257,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     legeness = []
 
     st = time.time()
-    for k in keys:
+    for k in tqdm(keys):
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
