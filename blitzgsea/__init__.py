@@ -198,10 +198,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     gsize = len(gene_set)
     
     rs, es = enrichment_score(signature, abs_signature, signature_map, gene_set)
-    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
-
-    #es = 2
-    legenes = ""
+    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
 
     pos_alpha = f_alpha_pos(gsize)
     pos_beta = f_beta_pos(gsize)
@@ -212,8 +209,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     if es > 0:
         prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
-        if prob > 0.95:
-            print(prob)
+        if prob > 0.999999:
             prob = gammacdf(es, float(pos_alpha), float(pos_beta))
         prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
         if prob_two_tailed == 1:
@@ -227,8 +223,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
         pval = 2*prob_two_tailed
     else:
         prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
-        if prob > 0.95:
-            print(prob)
+        if prob > 0.999999:
             prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
         prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
         nes = invcdf(mpf(np.min([1,prob_two_tailed])))
