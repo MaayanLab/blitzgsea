@@ -254,7 +254,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     pvals = []
     ness = []
     set_size = []
-    legenes = []
+    legeness = []
 
     for k in keys:
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
@@ -303,7 +303,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             ess.append(float(es))
             pvals.append(float(pval))
             set_size.append(gsize)
-            legenes.append(legenes)
+            legeness.append(legenes)
 
     if not verbose:
         np.seterr(divide = 'ignore')
@@ -311,7 +311,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
-    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(ness).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legenes)]).T
+    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(ness).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legeness)]).T
     res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
     res = res.set_index("Term")
 
