@@ -256,6 +256,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     set_size = []
     legeness = []
 
+    st = time.time()
     for k in keys:
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
@@ -304,6 +305,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             pvals.append(float(pval))
             set_size.append(gsize)
             legeness.append(legenes)
+
+    print(time.time()-st)
 
     if not verbose:
         np.seterr(divide = 'ignore')
