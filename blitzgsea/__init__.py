@@ -277,7 +277,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     
     results = []
     ess = []
-    pvals = []
+    pvals = [1, 1]
     nes = []
     set_size = []
     legenes = []
