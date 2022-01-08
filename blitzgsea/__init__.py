@@ -31,8 +31,7 @@ reload(blitzgsea.plot)
 mp.dps = 1000
 mp.prec = 1000
 
-def strip_gene_set(signature, gene_set):
-    signature_genes = set(signature.index)
+def strip_gene_set(signature, signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
 
 def enrichment_score(signature, abs_signature, signature_map, gene_set):
@@ -268,9 +267,9 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     st=time.time()
     params = []
     keys = list(library.keys())
+    signature_genes = set(signature.index)
     for k in keys:
-        #stripped_set = strip_gene_set(signature, library[k])
-        stripped_set = library[k]
+        stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
             params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
