@@ -34,18 +34,17 @@ mp.prec = 1000
 def strip_gene_set(signature, signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
 
-def enrichment_score(signature, abs_signature, signature_map, gene_set):
-    gs = set(gene_set)
-    hits = [signature_map[x] for x in gs if x in signature_map.keys()]
-    hit_indicator = np.zeros(signature.shape[0])
+def enrichment_score(abs_signature, signature_map, gene_set):
+    hits = [signature_map[x] for x in gene_set if x in signature_map.keys()]
+    hit_indicator = np.zeros(len(abs_signature))
     hit_indicator[hits] = 1
     no_hit_indicator = 1 - hit_indicator
     number_hits = len(hits)
-    number_miss = signature.shape[0] - number_hits
-    sum_hit_scores = np.sum(abs_signature.iloc[hits])
+    number_miss = len(abs_signature) - number_hits
+    sum_hit_scores = np.sum(abs_signature[hits])
     norm_hit =  float(1.0/sum_hit_scores)
     norm_no_hit = float(1.0/number_miss)
-    running_sum = np.cumsum(hit_indicator * abs_signature.iloc[:,0] * norm_hit - no_hit_indicator * norm_no_hit)
+    running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
     nn = np.argmax(np.abs(running_sum))
     es = running_sum[nn]
     return running_sum, es
@@ -67,7 +66,7 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
     random.seed(seed)
     for _ in range(permutations):
         rgenes = random.sample(list(signature.index), size)
-        es.append(enrichment_score(signature, abs_signature, signature_map, rgenes)[1])
+        es.append(enrichment_score(abs_signature, signature_map, rgenes)[1])
     return es
 
 def loess_interpolation(x, y, frac=0.5):
@@ -197,12 +196,12 @@ def probability_star(args):
 def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_pos_ratio):
     gsize = len(gene_set)
     
-    rs, es = enrichment_score(signature, abs_signature, signature_map, gene_set)
-    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
+    rs, es = enrichment_score(abs_signature, signature_map, gene_set)
+    legenes = get_leading_edge(rs, signature, gene_set, signature_map)
 
-    #pos_alpha = f_alpha_pos(gsize)
-    #pos_beta = f_beta_pos(gsize)
-    #pos_ratio = f_pos_ratio(gsize)
+    pos_alpha = f_alpha_pos(gsize)
+    pos_beta = f_beta_pos(gsize)
+    pos_ratio = f_pos_ratio(gsize)
 
     nes = 0
     pval = 1
@@ -226,8 +225,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
-    abs_signature = signature
-    abs_signature.iloc[:,0] = np.abs(abs_signature.iloc[:,0])
+    
+    abs_signature = np.array(np.abs(signature.iloc[:,0]))
 
     signature_map = {}
     for i,h in enumerate(signature.index):
@@ -248,8 +247,6 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     #with multiprocessing.Pool(processes) as pool:
     #    results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
     
-    results = []
-
     ess = []
     pvals = []
     ness = []
@@ -262,7 +259,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
             gsize = len(stripped_set)
-            rs, es = enrichment_score(signature, abs_signature, signature_map, stripped_set)
+            rs, es = enrichment_score(abs_signature, signature_map, stripped_set)
             legenes = get_leading_edge(rs, signature, stripped_set, signature_map)
 
             pos_alpha = f_alpha_pos(gsize)
