@@ -16,7 +16,7 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     gs = set(library[geneset])
     hits = [i for i,x in enumerate(signature.index) if x in gs]
     
-    running_sum, es = blitz.enrichment_score(signature, signature_map, gs)
+    running_sum, es = blitz.enrichment_score(np.array(np.abs(signature.iloc[:,0])), signature_map, gs)
     running_sum = list(running_sum)
     fig = plt.figure(figsize=(7,5))
     
