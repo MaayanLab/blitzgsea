@@ -197,10 +197,10 @@ def probability_star(args):
 def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_pos_ratio):
     gsize = len(gene_set)
     
-    #rs, es = enrichment_score(signature, abs_signature, signature_map, gene_set)
+    rs, es = enrichment_score(signature, abs_signature, signature_map, gene_set)
     #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
 
-    es = 2
+    #es = 2
     legenes = ""
 
     pos_alpha = f_alpha_pos(gsize)
