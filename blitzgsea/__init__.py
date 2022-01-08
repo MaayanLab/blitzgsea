@@ -296,11 +296,12 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
-    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legenes)]).T
-    res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
-    res = res.set_index("Term")
-
+    #res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legenes)]).T
+    #res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
+    #res = res.set_index("Term")
+    res = 0
     if (ks_pos < 0.05 or ks_neg < 0.05) and verbose:
         print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
-    return res.sort_values("pval", key=abs, ascending=True)
+    #return res.sort_values("pval", key=abs, ascending=True)
+    return res
