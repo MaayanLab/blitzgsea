@@ -218,8 +218,8 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
             nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
             if nes == np.inf:
                 print(prob)
-                mp.dps = 100
-                mp.prec = 100
+                mp.dps = 1000
+                mp.prec = 1000
                 nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
     else:
@@ -230,8 +230,8 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
         prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
         nes = invcdf(mpf(np.min([1,prob_two_tailed])))
         if nes == np.inf:
-            mp.dps = 100
-            mp.prec = 100
+            mp.dps = 1000
+            mp.prec = 1000
             nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
     mp.dps = 100
@@ -272,9 +272,10 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             gsets.append(k)
             params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
     
-    with multiprocessing.Pool(processes) as pool:
-        results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
+    #with multiprocessing.Pool(processes) as pool:
+        #results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
     
+    results = []
     ess = []
     pvals = []
     nes = []
