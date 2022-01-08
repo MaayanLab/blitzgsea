@@ -299,8 +299,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             mp.dps = 100
             mp.prec = 100
             
-            nes.append(nes)
-            ess.append(es)
+            nes.append(float(nes))
+            ess.append(float(es))
             pvals.append(float(pval))
             set_size.append(gsize)
             legenes.append(legenes)
