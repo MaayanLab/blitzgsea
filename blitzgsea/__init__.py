@@ -204,12 +204,13 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     pos_beta = f_beta_pos(gsize)
     pos_ratio = f_pos_ratio(gsize)
 
-    mp.dps = 100
-    mp.prec = 100
+    mp.dps = 200
+    mp.prec = 200
 
     if es > 0:
         prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
         if prob > 0.999999:
+            print(prob)
             prob = gammacdf(es, float(pos_alpha), float(pos_beta))
         prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
         if prob_two_tailed == 1:
@@ -224,6 +225,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     else:
         prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
         if prob > 0.999999:
+            print(prob)
             prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
         prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
         nes = invcdf(mpf(np.min([1,prob_two_tailed])))
@@ -232,8 +234,8 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
             mp.prec = 1000
             nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
         pval = 2*prob_two_tailed
-    mp.dps = 100
-    mp.prec = 100
+    mp.dps = 200
+    mp.prec = 200
     return gsize, es, nes, pval, legenes
 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
