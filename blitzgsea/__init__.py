@@ -204,36 +204,9 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     pos_beta = f_beta_pos(gsize)
     pos_ratio = f_pos_ratio(gsize)
 
-    mp.dps = 100
-    mp.prec = 100
-
-    if es > 0:
-        prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
-        if prob > 0.999999:
-            prob = gammacdf(es, float(pos_alpha), float(pos_beta))
-        prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
-        if prob_two_tailed == 1:
-            nes = 0
-        else:
-            nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
-            if nes == np.inf:
-                mp.dps = 1000
-                mp.prec = 1000
-                nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
-        pval = 2*prob_two_tailed
-    else:
-        prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
-        if prob > 0.999999:
-            prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
-        prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
-        nes = invcdf(mpf(np.min([1,prob_two_tailed])))
-        if nes == np.inf:
-            mp.dps = 1000
-            mp.prec = 1000
-            nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
-        pval = 2*prob_two_tailed
-    mp.dps = 100
-    mp.prec = 100
+    nes = 0
+    pval = 1
+    
     return gsize, es, nes, pval, legenes
 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
@@ -262,7 +235,6 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
     
-    st=time.time()
     params = []
     keys = list(library.keys())
     signature_genes = set(signature.index)
@@ -272,11 +244,9 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             gsets.append(k)
             params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
     
-    print(time.time()-st)
     with multiprocessing.Pool(processes) as pool:
         results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
     
-    results = []
     ess = []
     pvals = [1, 1]
     nes = []
@@ -297,12 +267,11 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     fdr_values = multipletests(pvals, method="fdr_bh")[1]
     sidak_values = multipletests(pvals, method="sidak")[1]
 
-    #res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legenes)]).T
-    #res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
-    #res = res.set_index("Term")
-    res = 0
+    res =  pd.DataFrame([gsets, np.array(ess).astype("float"), np.array(nes).astype("float"), np.array(pvals).astype("float"), np.array(sidak_values).astype("float"), np.array(fdr_values).astype("float"), np.array(set_size).astype("int"), np.array(legenes)]).T
+    res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
+    res = res.set_index("Term")
+
     if (ks_pos < 0.05 or ks_neg < 0.05) and verbose:
         print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
-    #return res.sort_values("pval", key=abs, ascending=True)
-    return res
+    return res.sort_values("pval", key=abs, ascending=True)
