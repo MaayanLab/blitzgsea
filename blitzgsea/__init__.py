@@ -239,28 +239,71 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     params = []
     keys = list(library.keys())
     signature_genes = set(signature.index)
-    for k in keys:
-        stripped_set = strip_gene_set(signature, signature_genes, library[k])
-        if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
-            gsets.append(k)
-            params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
+    #for k in keys:
+    #    stripped_set = strip_gene_set(signature, signature_genes, library[k])
+    #    if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
+    #        gsets.append(k)
+    #        params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
     
-    with multiprocessing.Pool(processes) as pool:
-        results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
+    #with multiprocessing.Pool(processes) as pool:
+    #    results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
     
+    results = []
+
     ess = []
-    pvals = [1, 1]
+    pvals = []
     nes = []
     set_size = []
     legenes = []
 
-    for res in results:
-        gsize, es, ne, pval, legene = res
-        nes.append(ne)
-        ess.append(es)
-        pvals.append(float(pval))
-        set_size.append(gsize)
-        legenes.append(legene)
+    for k in keys:
+        stripped_set = strip_gene_set(signature, signature_genes, library[k])
+        if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
+            gsets.append(k)
+            gsize = len(stripped_set)
+            rr, es = enrichment_score(signature, abs_signature, signature_map, stripped_set)
+            legenes = get_leading_edge(rs, signature, stripped_set, signature_map)
+
+            pos_alpha = f_alpha_pos(gsize)
+            pos_beta = f_beta_pos(gsize)
+            pos_ratio = f_pos_ratio(gsize)
+
+            mp.dps = 100
+            mp.prec = 100
+
+            if es > 0:
+                prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
+                if prob > 0.999999:
+                    prob = gammacdf(es, float(pos_alpha), float(pos_beta))
+                prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
+                if prob_two_tailed == 1:
+                    nes = 0
+                else:
+                    nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
+                    if nes == np.inf:
+                        mp.dps = 1000
+                        mp.prec = 1000
+                        nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
+                pval = 2*prob_two_tailed
+            else:
+                prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
+                if prob > 0.999999:
+                    prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
+                prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
+                nes = invcdf(mpf(np.min([1,prob_two_tailed])))
+                if nes == np.inf:
+                    mp.dps = 1000
+                    mp.prec = 1000
+                    nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
+                pval = 2*prob_two_tailed
+            mp.dps = 100
+            mp.prec = 100
+            
+            nes.append(nes)
+            ess.append(es)
+            pvals.append(float(pval))
+            set_size.append(gsize)
+            legenes.append(legenes)
     
     if not verbose:
         np.seterr(divide = 'ignore')
