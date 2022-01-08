@@ -264,6 +264,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
     
+    st=time.time()
     params = []
     keys = list(library.keys())
     for k in keys:
@@ -272,6 +273,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             gsets.append(k)
             params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
     
+    print(time.time()-st)
     #with multiprocessing.Pool(processes) as pool:
         #results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
     
