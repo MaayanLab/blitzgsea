@@ -87,7 +87,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
-    x = sorted(list(set(np.append([1,4,6, np.max(ll)], nn).astype("int"))))
+    x = sorted(list(set(np.append([1,4,6, np.max(ll), 2000, 4000, len(signature)], nn).astype("int"))))
 
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
@@ -234,7 +234,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     signature_map = {}
     for i,h in enumerate(signature.index):
         signature_map[h] = i
-    
+
     sig_hash = hash(signature.to_string())
     if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
         print("Use cached anchor parameters")
