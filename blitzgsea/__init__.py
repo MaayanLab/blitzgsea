@@ -34,10 +34,6 @@ mp.prec = 1000
 global blitzgsea_signature_anchors
 blitzgsea_signature_anchors = {}
 
-def hash(sourcedf,destinationdf,*column):
-    columnName = ''
-    destinationdf['hash_'+columnName.join(column)] = pd.DataFrame(sourcedf[list(column)].values.sum(axis=1))[0].str.encode('utf-8').apply(lambda x: (hashlib.sha512(x).hexdigest().upper()))
-
 def strip_gene_set(signature, signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
 
