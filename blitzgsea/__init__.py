@@ -234,16 +234,15 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     signature_map = {}
     for i,h in enumerate(signature.index):
         signature_map[h] = i
-
-    if signature_cache:
-        sig_hash = hash(signature.to_string())
-        if sig_hash in blitzgsea_signature_anchors.keys():
-            print("Use cached anchor parameters")
-            f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
-        else:
-            f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
-            blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
-        
+    
+    sig_hash = hash(signature.to_string())
+    if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
+        print("Use cached anchor parameters")
+        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
+    else:
+        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
+        blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
+    
     #f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
     
