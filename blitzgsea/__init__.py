@@ -212,7 +212,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -235,15 +235,15 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    
-    sig_hash = hash(signature.to_string())
-    if sig_hash in blitzgsea_signature_anchors.keys():
-        print("Use cached anchor parameters")
-        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
-    else:
-        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
-        blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
-    
+    if signature_cache:
+        sig_hash = hash(signature.to_string())
+        if sig_hash in blitzgsea_signature_anchors.keys():
+            print("Use cached anchor parameters")
+            f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
+        else:
+            f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
+            blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
+        
     #f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
     
