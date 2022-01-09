@@ -5,6 +5,7 @@ import pandas as pd
 from loess.loess_1d import loess_1d
 from collections import Counter
 from scipy import interpolate
+import hashlib
 
 from scipy.stats import kstest
 from matplotlib import pyplot as plt
@@ -30,6 +31,12 @@ reload(blitzgsea.plot)
 
 mp.dps = 1000
 mp.prec = 1000
+global blitzgsea_signature_anchors
+blitzgsea_signature_anchors = {}
+
+def hash(sourcedf,destinationdf,*column):
+    columnName = ''
+    destinationdf['hash_'+columnName.join(column)] = pd.DataFrame(sourcedf[list(column)].values.sum(axis=1))[0].str.encode('utf-8').apply(lambda x: (hashlib.sha512(x).hexdigest().upper()))
 
 def strip_gene_set(signature, signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
@@ -212,7 +219,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
-    
+
     signature.columns = [0,1]
     if permutations < 1000 and not symmetric:
         if verbose:
@@ -232,6 +239,15 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
+    
+    sig_hash = hash(signature.to_string())
+    if sig_hash in blitzgsea_signature_anchors.keys():
+        print("Use cached anchor parameters")
+        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
+    else:
+        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
+        blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
+    
     f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
     
