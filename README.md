@@ -87,6 +87,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `anchors`	| int | 20 | Number of gene set size distributions calculated. Remaining are interpolated. |
 | `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
+| `signature_cache` | bool | True | Use precomputed anchor parameters. |
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
