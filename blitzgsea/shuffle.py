@@ -66,3 +66,5 @@ def sample_shuffle(exprs, library, groups, permutation_num=1000, seed=1):
     res =  pd.DataFrame([keys, np.array(es).astype("float"), np.array(pvals).astype("float"), np.array(fdr_values).astype("float"), np.array(sidak_values).astype("float")]).T
     res.columns = ["Term", "es", "pval", "fdr", "sidak"]
     res = res.set_index("Term")
+
+    return res
