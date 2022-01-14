@@ -2,14 +2,14 @@ import numpy as np
 from statsmodels.stats.multitest import multipletests
 import pandas as pd
 
-def gsea(exprs, library, groups, permutation_num=1000, seed=1):
+def gsea(exprs, library, groups, permutations=1000, seed=1):
 
     pos = 0
     neg = 1
 
     rs = np.random.RandomState(seed)
     expr_mat = exprs.T
-    perm_cor_tensor = np.tile(expr_mat, (permutation_num,1,1))
+    perm_cor_tensor = np.tile(expr_mat, (permutations,1,1))
 
     perm_cor_tensor.shape
     for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
@@ -42,7 +42,6 @@ def gsea(exprs, library, groups, permutation_num=1000, seed=1):
     perm_tag_tensor = np.stack([tag.take(genes_ind).T for tag in tag_indicator], axis=0)
     
     no_tag_tensor = 1 - perm_tag_tensor
-    # calculate numerator, denominator of each gene hits
     rank_alpha = np.abs(perm_tag_tensor*cor_mat[np.newaxis,:,:])
 
     axis=1
