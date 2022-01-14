@@ -149,7 +149,7 @@ The resulting plots will look like the examples below:
 This is the sample shuffling algorithm from GSEApy. It performs a t-test to build signatures for phenotype shuffled groups. The input is a gene expression dataframe, which should be normalized for library size. `classes` is a list containing 0 or 1 describing the corresponding group for the samples in `exprs`. 
 
 ```
-blitz.shuffle.gsea(exprs, library, classes, permutations=50)
+blitz.shuffle.gsea(exprs, library, groups, permutations=50, seed=1)
 ```
 
 | parameter name | type | default	| description |
