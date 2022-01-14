@@ -2,7 +2,7 @@ import numpy as np
 from statsmodels.stats.multitest import multipletests
 import pandas as pd
 
-def sample_shuffle(exprs, library, groups, permutation_num=1000, seed=1):
+def gsea(exprs, library, groups, permutation_num=1000, seed=1):
 
     pos = 0
     neg = 1
