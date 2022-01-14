@@ -149,9 +149,15 @@ The resulting plots will look like the examples below:
 This is the sample shuffling algorithm from GSEApy. It performs a t-test to build signatures for phenotype shuffled groups. The input is a gene expression dataframe, which should be normalized for library size. `classes` is a list containing 0 or 1 describing the corresponding group for the samples in `exprs`. 
 
 ```
-blitz.shuffle.sample_shuffle(exprs, library, classes, permutation_num=50)
+blitz.shuffle.gsea(exprs, library, classes, permutations=50)
 ```
 
+| parameter name | type | default	| description |
+|:-----|:---------|:-------------|:------|
+| `exprs`	| pd.DataFrame | NA	| Normalized gene expression matrix. |
+| `library` | dictionary | NA | Gene set library. |
+| `permutations` | int | 1000 | Number of permutations. |
+| `seed`	| int | 1 | Random state seed. |
 
 # Dependencies
 Python 3.6+
