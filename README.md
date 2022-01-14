@@ -156,6 +156,7 @@ blitz.shuffle.gsea(exprs, library, classes, permutations=50)
 |:-----|:---------|:-------------|:------|
 | `exprs`	| pd.DataFrame | NA	| Normalized gene expression matrix. |
 | `library` | dictionary | NA | Gene set library. |
+| `groups` | list | NA | Phenotype group labels of samples. Labels are 0 or 1. |
 | `permutations` | int | 1000 | Number of permutations. |
 | `seed`	| int | 1 | Random state seed. |
 
