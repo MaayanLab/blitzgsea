@@ -146,7 +146,7 @@ The resulting plots will look like the examples below:
 <img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/top_table.png" width=300>
 
 ### Sample shuffling
-This is the sample shuffling algorithm from GSEApy. It performs a t-test to build signatures for phenotype shuffled groups. The input is a gene expression dataframe, which should be normalized for library size. `classes` is a list containing 0 or 1 describing the corresponding group for the samples in `exprs`. 
+This is the sample shuffling algorithm from GSEApy. It performs a t-test to build signatures for phenotype shuffled groups. The input is a gene expression dataframe, which should be normalized for library size. `groups` is a list containing 0 or 1 describing the corresponding group for the samples in `exprs`. 
 
 ```
 blitz.shuffle.gsea(exprs, library, groups, permutations=50, seed=1)
