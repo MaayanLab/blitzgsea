@@ -58,7 +58,7 @@ import blitzgsea as blitz
 import urllib.request
 import pandas as pd
 
-# download example GMT file from Enrichr
+# download example gene expression signature
 url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
 urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
 
@@ -103,7 +103,7 @@ import blitzgsea as blitz
 import urllib.request
 import pandas as pd
 
-# download example GMT file from Enrichr
+# download example gene expression signature
 url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
 urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
 
