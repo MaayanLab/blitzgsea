@@ -2,13 +2,10 @@ import numpy as np
 from statsmodels.stats.multitest import multipletests
 import pandas as pd
 
-def sample_shuffle(exprs, library, permutation_num=1000, seed=1):
+def sample_shuffle(exprs, library, groups, permutation_num=1000, seed=1):
 
     pos = 0
     neg = 1
-
-    classes = np.zeros(exprs.shape[1])
-    classes[round(exprs.shape[1]/2):] = np.ones(round(exprs.shape[1]/2))
 
     rs = np.random.RandomState(seed)
     expr_mat = exprs.T
@@ -17,9 +14,9 @@ def sample_shuffle(exprs, library, permutation_num=1000, seed=1):
     perm_cor_tensor.shape
     for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
 
-    classes = np.array(classes)
-    pos = classes == pos
-    neg = classes == neg
+    groups = np.array(groups)
+    pos = groups == pos
+    neg = groups == neg
     n_pos = np.sum(pos)
     n_neg = np.sum(neg)
     pos_cor_mean = perm_cor_tensor[:,pos,:].mean(axis=1)
