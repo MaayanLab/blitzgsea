@@ -67,4 +67,4 @@ def sample_shuffle(exprs, library, groups, permutation_num=1000, seed=1):
     res.columns = ["Term", "es", "pval", "fdr", "sidak"]
     res = res.set_index("Term")
 
-    return res
+    return res.sort_values("pval")
