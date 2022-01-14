@@ -1,17 +1,14 @@
 import random
-import time
 import numpy as np
 import pandas as pd
 from loess.loess_1d import loess_1d
 from collections import Counter
 from scipy import interpolate
-import hashlib
 
 from scipy.stats import kstest
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
-import warnings
 import multiprocessing
 
 from mpmath import mp
@@ -24,10 +21,12 @@ from scipy.stats import gamma
 
 import blitzgsea.enrichr
 import blitzgsea.plot
+import blitzgsea.shuffle
 
 from importlib import reload
 reload(blitzgsea.enrichr)
 reload(blitzgsea.plot)
+reload(blitzgsea.shuffle)
 
 mp.dps = 1000
 mp.prec = 1000
