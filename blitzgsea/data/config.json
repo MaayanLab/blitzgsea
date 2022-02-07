@@ -1,4 +1,4 @@
 {
-    "LIBRARY_LIST_URL": "http://maayanlab.cloud/speedrichr/api/listlibs",
-    "LIBRARY_DOWNLOAD_URL": "http://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName="
+    "LIBRARY_LIST_URL": "https://maayanlab.cloud/speedrichr/api/listlibs",
+    "LIBRARY_DOWNLOAD_URL": "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName="
 }

@@ -4,6 +4,7 @@ import urllib.request
 import json
 import os
 import re
+import ssl
 
 def get_library(library: str):
     return read_gmt(load_library(library))
@@ -16,7 +17,8 @@ def load_library(library: str, overwrite: bool = False, verbose: bool = False) -
     if not os.path.exists(get_data_path()+library or overwrite):
         if verbose:
             print("Download Enrichr geneset library")
-        urllib.request.urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library)
+        context = ssl._create_unverified_context()
+        urllib.request.urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library, context=context)
     else:
         if verbose:
             print("File cached. To reload use load_library(\""+library+"\", overwrite=True) instead.")
@@ -55,8 +57,9 @@ def read_gmt(gmt_file: str, background_genes: List[str]=[], verbose=False):
     return library
 
 def load_json(url):
+    context = ssl._create_unverified_context()
     req = urllib.request.Request(url)
-    r = urllib.request.urlopen(req).read()
+    r = urllib.request.urlopen(req, context=context).read()
     return(json.loads(r.decode('utf-8')))
 
 def get_config():
