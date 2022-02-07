@@ -18,7 +18,7 @@ def load_library(library: str, overwrite: bool = False, verbose: bool = False) -
         if verbose:
             print("Download Enrichr geneset library")
         context = ssl._create_unverified_context()
-        urllib.request.urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library, context=context)
+        urllib.request.urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library)
     else:
         if verbose:
             print("File cached. To reload use load_library(\""+library+"\", overwrite=True) instead.")
