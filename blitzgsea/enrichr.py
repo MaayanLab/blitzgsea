@@ -1,6 +1,7 @@
 from typing import List
 import itertools
 import urllib.request
+import shutil
 import json
 import os
 import re
@@ -17,8 +18,7 @@ def load_library(library: str, overwrite: bool = False, verbose: bool = False) -
     if not os.path.exists(get_data_path()+library or overwrite):
         if verbose:
             print("Download Enrichr geneset library")
-        context = ssl._create_unverified_context()
-        urllib.request.urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library)
+        urlretrieve(get_config()["LIBRARY_DOWNLOAD_URL"]+library, get_data_path()+library)
     else:
         if verbose:
             print("File cached. To reload use load_library(\""+library+"\", overwrite=True) instead.")
@@ -76,3 +76,9 @@ def get_data_path() -> str:
         'data/'
     )
     return(path)
+
+def urlretrieve(req, filename):
+    context = ssl._create_unverified_context()
+    with urllib.request.urlopen(req, context=context) as fr:
+        with open(filename, 'wb') as fw:
+            shutil.copyfileobj(fr, fw)
