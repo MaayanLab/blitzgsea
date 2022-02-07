@@ -9,6 +9,7 @@ def get_library(library: str):
     return read_gmt(load_library(library))
 
 def list_libraries():
+    print(get_config())
     return(load_json(get_config()["LIBRARY_LIST_URL"])["library"])
 
 def load_library(library: str, overwrite: bool = False, verbose: bool = False) -> str:
