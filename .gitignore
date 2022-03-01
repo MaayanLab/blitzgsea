@@ -5,3 +5,6 @@ chea_enrichment.csv
 .DS_Store
 ChEA_2016
 blitzgsea2*
+*.egg-info
+build
+ageing_muscle_gtex.tsv
