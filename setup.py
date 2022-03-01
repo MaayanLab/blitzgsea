@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="blitzgsea",
-    version="1.1.1",
+    version="1.1.2",
     author="Alexander Lachmann",
     author_email="alexander.lachmann@mssm.edu",
     description="Package for fast calculation of GSEA similar to prerank using gamma distribution approximation.",
@@ -23,7 +23,7 @@ setuptools.setup(
     },
     include_package_data=True,
     install_requires=[
-        'pandas',
+        'pandas>=1.1.5',
         'numpy',
         'scikit-learn',
         'progress',
