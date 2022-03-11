@@ -166,6 +166,7 @@ Python 3.6+
 # Citation
 
 When using blitzgsea please cite the following reference:
+
 Lachmann, Alexander, Zhuorui Xie, and Avi Ma’ayan. "blitzGSEA: efficient computation of gene set enrichment analysis through gamma distribution approximation." Bioinformatics (2022).
 https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btac076/6526383?login=false
 
