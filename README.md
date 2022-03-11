@@ -163,8 +163,16 @@ blitz.shuffle.gsea(exprs, library, groups, permutations=50, seed=1)
 # Dependencies
 Python 3.6+
 
+# Citation
+
+When using blitzgsea please cite the following reference:
+Lachmann, Alexander, Zhuorui Xie, and Avi Ma’ayan. "blitzGSEA: efficient computation of gene set enrichment analysis through gamma distribution approximation." Bioinformatics (2022).
+https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btac076/6526383?login=false
+
 # References
 
-[1] Subramanian, Aravind, Heidi Kuehn, Joshua Gould, Pablo Tamayo, and Jill P. Mesirov. "GSEA-P: a desktop application for Gene Set Enrichment Analysis." Bioinformatics 23, no. 23 (2007): 3251-3253.
+[1] Lachmann, Alexander, Zhuorui Xie, and Avi Ma’ayan. "blitzGSEA: efficient computation of gene set enrichment analysis through gamma distribution approximation." Bioinformatics (2022).
 
-[2] Fang, Z., A. Wolf, Y. Liao, A. McKay, F. Fröhlich, J. Kimmel, L. Xiaohui, and sorrge. "zqfang/gseapy: gseapy-v0. 10.3." (2021).
+[2] Subramanian, Aravind, Heidi Kuehn, Joshua Gould, Pablo Tamayo, and Jill P. Mesirov. "GSEA-P: a desktop application for Gene Set Enrichment Analysis." Bioinformatics 23, no. 23 (2007): 3251-3253.
+
+[3] Fang, Z., A. Wolf, Y. Liao, A. McKay, F. Fröhlich, J. Kimmel, L. Xiaohui, and sorrge. "zqfang/gseapy: gseapy-v0. 10.3." (2021).
