@@ -310,6 +310,14 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
     res =  pd.DataFrame([gsets, np.array(ess), np.array(ness), np.array(pvals), np.array(sidak_values), np.array(fdr_values), np.array(set_size), np.array(legeness)]).T
     res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
+    res["term"] = res['term'].astype("str")
+    res["es"] = res['es'].astype("float")
+    res["nes"] = res['nes'].astype("float")
+    res["pval"] = res['pval'].astype("float")
+    res["sidak"] = res['sidak'].astype("float")
+    res["fdr"] = res['fdr'].astype("float")
+    res["geneset_size"] = res['geneset_size'].astype("int")
+    res["leading_edge"] = res['leading_edge'].astype("str")
     res = res.set_index("Term")
 
     if (ks_pos < 0.05 or ks_neg < 0.05) and verbose:
