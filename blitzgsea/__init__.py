@@ -310,7 +310,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
     res =  pd.DataFrame([gsets, np.array(ess), np.array(ness), np.array(pvals), np.array(sidak_values), np.array(fdr_values), np.array(set_size), np.array(legeness)]).T
     res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
-    res["term"] = res['term'].astype("str")
+    res["Term"] = res['Term'].astype("str")
     res["es"] = res['es'].astype("float")
     res["nes"] = res['nes'].astype("float")
     res["pval"] = res['pval'].astype("float")
