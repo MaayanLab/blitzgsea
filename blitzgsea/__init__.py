@@ -275,12 +275,14 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             pos_beta = f_beta_pos(gsize)
             pos_ratio = f_pos_ratio(gsize)
 
-            mp.dps = 500
-            mp.prec = 500
+            mp.dps = 50
+            mp.prec = 50
 
             if es > 0:
                 prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
-                if prob > 0.999999:
+                if prob > 0.99999999:
+                    mp.dps = 500
+                    mp.prec = 500
                     prob = gammacdf(es, float(pos_alpha), float(pos_beta))
                 prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
                 if prob_two_tailed == 1:
@@ -290,12 +292,17 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
                 pval = 2*prob_two_tailed
             else:
                 prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
-                if prob > 0.999999:
+                if prob > 0.99999999:
+                    mp.dps = 500
+                    mp.prec = 500
                     prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
                 prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
                 nes = invcdf(mpf(np.min([1,prob_two_tailed])))
                 pval = 2*prob_two_tailed
             
+            mp.dps = 50
+            mp.prec = 50
+
             ness.append(float(nes))
             ess.append(float(es))
             pvals.append(float(pval))
