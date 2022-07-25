@@ -44,6 +44,8 @@ def enrichment_score(abs_signature, signature_map, gene_set):
     number_hits = len(hits)
     number_miss = len(abs_signature) - number_hits
     sum_hit_scores = np.sum(abs_signature[hits])
+    if sum_hit_scores == 0:
+        return 0, 0
     norm_hit =  float(1.0/sum_hit_scores)
     norm_no_hit = float(1.0/number_miss)
     running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
@@ -199,11 +201,6 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     gsize = len(gene_set)
     
     rs, es = enrichment_score(abs_signature, signature_map, gene_set)
-    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
-
-    #pos_alpha = f_alpha_pos(gsize)
-    #pos_beta = f_beta_pos(gsize)
-    #pos_ratio = f_pos_ratio(gsize)
 
     nes = 0
     pval = 1
