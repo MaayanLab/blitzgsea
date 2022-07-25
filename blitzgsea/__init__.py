@@ -222,7 +222,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             print('Low numer of permutations can lead to inaccurate p-value estimation. Consider increasing number of permutations.')
         symmetric = True
 
-    signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*10000)
+    random.seed(seed)
+    signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
@@ -240,21 +241,11 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
         blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
     
-    #f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
-    
-    #params = []
+
     keys = list(library.keys())
     signature_genes = set(signature.index)
-    #for k in keys:
-    #    stripped_set = strip_gene_set(signature, signature_genes, library[k])
-    #    if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
-    #        gsets.append(k)
-    #        params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
-    
-    #with multiprocessing.Pool(processes) as pool:
-    #    results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
-    
+
     ess = []
     pvals = []
     ness = []
