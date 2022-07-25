@@ -164,9 +164,7 @@ def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
 def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
-    print("EA: "+str(set_size))
     es = np.array(get_peak_size(signature, abs_signature, signature_map, set_size, permutations, seed))
-    print(es)
     pos = [x for x in es if x > 0]
     neg = [x for x in es if x < 0]
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
