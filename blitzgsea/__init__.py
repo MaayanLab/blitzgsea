@@ -208,7 +208,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, seed: int=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -234,6 +234,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         signature_map[h] = i
 
     sig_hash = hash(signature.to_string())
+    if shared_null and len(blitzgsea_signature_anchors) > 0:
+        shared_null = list(blitzgsea_signature_anchors.keys())[0]
     if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
         print("Use cached anchor parameters")
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
