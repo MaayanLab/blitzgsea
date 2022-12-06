@@ -88,7 +88,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
-    x = sorted(list(set(np.append([1,4,6, np.max(ll), int(signature.shape[0]/2), signature.shape[0]], nn).astype("int"))))
+    x = sorted(list(set(np.append([1,4,6, np.max(ll), int(signature.shape[0]/2), signature.shape[0]-1], nn).astype("int"))))
 
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
