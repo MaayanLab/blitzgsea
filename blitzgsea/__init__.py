@@ -88,7 +88,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
-    x = sorted(list(set(np.append([1,4,6, np.max(ll), 2000, 4000], nn).astype("int"))))
+    x = sorted(list(set(np.append([1,4,6, np.max(ll), int(signature.shape[0]/2), signature.shape[0]], nn).astype("int"))))
 
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
@@ -224,7 +224,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
     random.seed(seed)
     sig_hash = hash(signature.to_string())
-    
+
     signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
