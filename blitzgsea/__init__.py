@@ -223,6 +223,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         symmetric = True
 
     random.seed(seed)
+    sig_hash = hash(signature.to_string())
+    
     signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
@@ -233,9 +235,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    sig_hash = hash(signature.to_string())
     if shared_null and len(blitzgsea_signature_anchors) > 0:
-        shared_null = list(blitzgsea_signature_anchors.keys())[0]
+        sig_hash = list(blitzgsea_signature_anchors.keys())[0]
     if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
         print("Use cached anchor parameters")
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
