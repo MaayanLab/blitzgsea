@@ -238,7 +238,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     if shared_null and len(blitzgsea_signature_anchors) > 0:
         sig_hash = list(blitzgsea_signature_anchors.keys())[0]
     if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
-        print("Use cached anchor parameters")
+        if verbose:
+            print("Use cached anchor parameters")
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
     else:
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
@@ -255,7 +256,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     set_size = []
     legeness = []
     
-    for k in tqdm(keys, desc="Enrichment "):
+    for k in tqdm(keys, desc="Enrichment ", disable=not verbose):
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
