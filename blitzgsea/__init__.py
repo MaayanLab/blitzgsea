@@ -225,7 +225,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     random.seed(seed)
     sig_hash = hash(signature.to_string())
 
-    signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
+    # signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
