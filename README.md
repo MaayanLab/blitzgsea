@@ -88,6 +88,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
 | `signature_cache` | bool | True | Use precomputed anchor parameters. |
+| `shared_null` | bool | False | Use same null for all signatures (Only computes calibration once). |
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
@@ -176,4 +177,4 @@ https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformati
 
 [2] Subramanian, Aravind, Heidi Kuehn, Joshua Gould, Pablo Tamayo, and Jill P. Mesirov. "GSEA-P: a desktop application for Gene Set Enrichment Analysis." Bioinformatics 23, no. 23 (2007): 3251-3253.
 
-[3] Fang, Z., A. Wolf, Y. Liao, A. McKay, F. Fröhlich, J. Kimmel, L. Xiaohui, and sorrge. "zqfang/gseapy: gseapy-v0. 10.3." (2021).
+[3] Fang, Zhuoqing, Xinyuan Liu, and Gary Peltz. "GSEApy: a comprehensive package for performing gene set enrichment analysis in Python." Bioinformatics (2022).

@@ -44,6 +44,8 @@ def enrichment_score(abs_signature, signature_map, gene_set):
     number_hits = len(hits)
     number_miss = len(abs_signature) - number_hits
     sum_hit_scores = np.sum(abs_signature[hits])
+    if sum_hit_scores == 0:
+        return 0, 0
     norm_hit =  float(1.0/sum_hit_scores)
     norm_no_hit = float(1.0/number_miss)
     running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
@@ -86,7 +88,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
-    x = sorted(list(set(np.append([1,4,6, np.max(ll), 2000, 4000], nn).astype("int"))))
+    x = sorted(list(set(np.append([1,4,6, np.max(ll), int(signature.shape[0]/2), signature.shape[0]-1], nn).astype("int"))))
 
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
@@ -199,11 +201,6 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
     gsize = len(gene_set)
     
     rs, es = enrichment_score(abs_signature, signature_map, gene_set)
-    #legenes = get_leading_edge(rs, signature, gene_set, signature_map)
-
-    #pos_alpha = f_alpha_pos(gsize)
-    #pos_beta = f_beta_pos(gsize)
-    #pos_ratio = f_pos_ratio(gsize)
 
     nes = 0
     pval = 1
@@ -211,7 +208,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, seed: int=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -225,6 +222,10 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             print('Low numer of permutations can lead to inaccurate p-value estimation. Consider increasing number of permutations.')
         symmetric = True
 
+    random.seed(seed)
+    sig_hash = hash(signature.to_string())
+
+    signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
@@ -234,36 +235,28 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    sig_hash = hash(signature.to_string())
+    if shared_null and len(blitzgsea_signature_anchors) > 0:
+        sig_hash = list(blitzgsea_signature_anchors.keys())[0]
     if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
-        print("Use cached anchor parameters")
+        if verbose:
+            print("Use cached anchor parameters")
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
     else:
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
         blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
     
-    #f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
     gsets = []
-    
-    #params = []
+
     keys = list(library.keys())
     signature_genes = set(signature.index)
-    #for k in keys:
-    #    stripped_set = strip_gene_set(signature, signature_genes, library[k])
-    #    if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
-    #        gsets.append(k)
-    #        params.append((signature, abs_signature, signature_map, stripped_set, f_alpha_pos, f_beta_pos, f_pos_ratio))
-    
-    #with multiprocessing.Pool(processes) as pool:
-    #    results = list(tqdm(pool.imap(probability_star, params), desc="Enrichment", total=len(params)))
-    
+
     ess = []
     pvals = []
     ness = []
     set_size = []
     legeness = []
     
-    for k in tqdm(keys, desc="Enrichment "):
+    for k in tqdm(keys, desc="Enrichment ", disable=not verbose):
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
