@@ -92,6 +92,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
+| `add_noise` | bool | False | Add small random noise to signature. The noise is a fraction of the expression values. |
 
 ### Plotting enrichment results
 
