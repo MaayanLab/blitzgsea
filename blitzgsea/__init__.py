@@ -208,7 +208,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0, add_noise=False):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -225,7 +225,9 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     random.seed(seed)
     sig_hash = hash(signature.to_string())
 
-    # signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
+    # optionally noise can be added as a fraction of the expression values
+    if add_noise:
+        signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
