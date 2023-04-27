@@ -55,15 +55,10 @@ This short example will download two files (signature and gene set library). The
 
 ```python
 import blitzgsea as blitz
-import urllib.request
 import pandas as pd
 
-# download example gene expression signature
-url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
-urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
-
 # read signature as pandas dataframe
-signature = pd.read_csv("ageing_muscle_gtex.tsv")
+signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
 
 # list available gene set libraries in Enrichr
 blitz.enrichr.print_libraries()
@@ -102,15 +97,10 @@ blitzGSEA supports several plotting functions. `blitzgsea.plot.running_sum()` an
 ```python
 
 import blitzgsea as blitz
-import urllib.request
 import pandas as pd
 
-# download example gene expression signature
-url = "https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv"
-urllib.request.urlretrieve(url, "ageing_muscle_gtex.tsv")
-
 # read signature as pandas dataframe
-signature = pd.read_csv("ageing_muscle_gtex.tsv")
+signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
 
 # list available gene set libraries in Enrichr
 blitz.enrichr.print_libraries()
