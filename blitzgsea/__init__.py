@@ -78,7 +78,7 @@ def loess_interpolation(x, y, frac=0.5):
     xout, yout, wout = loess_1d(x, yl, frac=frac)
     return interpolate.interp1d(xout, yout)
 
-def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, verbose=False, seed: int=0):
+def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, verbose=False, progress=False, seed: int=0):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -93,7 +93,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
         args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in x]
-        results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args)))
+        results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args), disable=not progress))
 
     alpha_pos = []
     beta_pos = []
@@ -208,7 +208,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0, add_noise: bool=False):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0, add_noise: bool=False, progress=False):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -244,7 +244,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             print("Use cached anchor parameters")
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
     else:
-        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed)
+        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress)
         blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
     
     gsets = []
