@@ -86,6 +86,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `shared_null` | bool | False | Use same null for all signatures (Only computes calibration once). |
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
+| `progress` | bool | False | Toggle progress bar. |
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
 | `add_noise` | bool | False | Add small random noise to signature. The noise is a fraction of the expression values. |
 
