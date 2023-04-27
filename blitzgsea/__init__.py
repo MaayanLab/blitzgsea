@@ -93,7 +93,10 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     jobs = processes
     with multiprocessing.Pool(jobs) as pool:
         args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in x]
-        results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args)))
+        results_iter = pool.imap(estimate_anchor_star, args)
+        if verbose:
+            results_iter = tqdm(results_iter, desc="Calibration", total=len(args))
+        results = list(results_iter)
 
     alpha_pos = []
     beta_pos = []
