@@ -187,7 +187,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
 def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
-def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed, fastnull):
+def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
     es = np.array(get_peak_size_adv(signature, abs_signature, signature_map, set_size, permutations, seed))
     pos = [x for x in es if x > 0]
     neg = [x for x in es if x < 0]
