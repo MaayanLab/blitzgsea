@@ -208,11 +208,11 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0, add_noise: bool=False, progress=False):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=np.inf, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0, add_noise: bool=False):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
-    signature.columns = [0,1]
+    signature.columns = ["i","v"]
     if permutations < 1000 and not symmetric:
         if verbose:
             print('Low numer of permutations can lead to inaccurate p-value estimation. Symmetric Gamma distribution enabled to increase accuracy.')
@@ -228,7 +228,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     # optionally noise can be added as a fraction of the expression values
     if add_noise:
         signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
-    signature = signature.sort_values(1, ascending=False).set_index(0)
+    signature = signature.sort_values("v", ascending=False).set_index("i")
     signature = signature[~signature.index.duplicated(keep='first')]
     
     abs_signature = np.array(np.abs(signature.iloc[:,0]))
