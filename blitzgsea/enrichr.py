@@ -41,9 +41,9 @@ def read_gmt(gmt_file: str, background_genes: List[str]=[], verbose=False):
         background_genes = [x.upper() for x in background_genes]
         background_set = set(background_genes)
     for line in lines:
-        sp = line.strip().upper().split("\t")
+        sp = line.strip().split("\t")
         sp2 = [re.sub(",.*", "",value) for value in sp[2:]]
-        sp2 = [x for x in sp2 if x] 
+        sp2 = [x.upper() for x in sp2 if x]
         if len(background_genes) > 2:
             geneset = list(set(sp2).intersection(background_set))
             if len(geneset) > 0:
