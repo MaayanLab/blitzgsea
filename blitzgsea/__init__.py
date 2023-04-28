@@ -46,12 +46,27 @@ def enrichment_score(abs_signature, signature_map, gene_set):
     sum_hit_scores = np.sum(abs_signature[hits])
     if sum_hit_scores == 0:
         return 0, 0
-    norm_hit =  float(1.0/sum_hit_scores)
+    norm_hit = float(1.0/sum_hit_scores)
     norm_no_hit = float(1.0/number_miss)
     running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
     nn = np.argmax(np.abs(running_sum))
     es = running_sum[nn]
     return running_sum, es
+
+def enrichment_score_null(abs_signature, hit_indicator, number_hits):
+    np.random.shuffle(hit_indicator)
+    hits = np.where(hit_indicator == 1)[0]
+    no_hit_indicator = 1 - hit_indicator
+    number_miss = len(abs_signature) - number_hits
+    sum_hit_scores = np.sum(abs_signature[hits])
+    if sum_hit_scores == 0:
+        return 0
+    norm_hit = float(1.0/sum_hit_scores)
+    norm_no_hit = float(1.0/number_miss)
+    running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
+    peak = np.abs(running_sum).argmax()
+    es = running_sum[peak]
+    return es
 
 def get_leading_edge(runningsum, signature, gene_set, signature_map):
     gs = set(gene_set)
@@ -71,6 +86,16 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
     for _ in range(permutations):
         rgenes = random.sample(list(signature.index), size)
         es.append(enrichment_score(abs_signature, signature_map, rgenes)[1])
+    return es
+
+def get_peak_size_adv(signature, abs_signature, signature_map, size, permutations, seed):
+    random.seed(seed)
+    es = []
+    number_hits = size
+    hit_indicator = np.zeros(len(abs_signature))
+    hit_indicator[0:number_hits] = 1
+    for i in range(permutations):
+        es.append(enrichment_score_null(abs_signature, hit_indicator, number_hits))
     return es
 
 def loess_interpolation(x, y, frac=0.5):
@@ -162,8 +187,8 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
 def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
-def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
-    es = np.array(get_peak_size(signature, abs_signature, signature_map, set_size, permutations, seed))
+def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed, fastnull):
+    es = np.array(get_peak_size_adv(signature, abs_signature, signature_map, set_size, permutations, seed))
     pos = [x for x in es if x > 0]
     neg = [x for x in es if x < 0]
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
