@@ -267,7 +267,9 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         if kld < kl_threshold:
             sig_hash = sig_hash_temp
             if verbose:
-                print(f"Found compatible null model. KL-divergence: {kld}")
+                print(f"Found compatible null model. Best KL-divergence: {kld}")
+        elif verbose:
+            print(f"No compatible null model. Best KL-divergence: {kld} > kl_threshold: {kl_threshold}")
 
     if sig_hash in pdf_cache.keys() and signature_cache:
         if verbose:
