@@ -83,7 +83,9 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
 | `signature_cache` | bool | True | Use precomputed anchor parameters. |
-| `shared_null` | bool | False | Use same null for all signatures (Only computes calibration once). |
+| `shared_null` | bool | False | Use same null for signatures if a compatible model already exists. (uses KL-divergence test). |
+| `kl_threshold`| float | 0.3 | Controls how similar signature value distributions have to be for reuse. |
+| `kl_bins`| int | 200 | Number of bins in PDF representation of distributions for KL test. |
 | `plotting`| bool | False | Plot estimated anchor parametes. |
 | `verbose` | bool | False | Toggle additonal output. |
 | `progress` | bool | False | Toggle progress bar. |
