@@ -388,4 +388,4 @@ def best_kl_fit(signature, pdfs, bins=200):
         k = kl_divergence(pdf, ipdf)
         res.append(k)
     min_pos = np.argmin(res)
-    return min_pos, res[min_pos], pdf_keys[min_pos]
+    return res[min_pos], pdf_keys[min_pos]
