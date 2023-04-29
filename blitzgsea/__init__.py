@@ -5,7 +5,6 @@ from loess.loess_1d import loess_1d
 from collections import Counter
 from scipy import interpolate
 
-from scipy.stats import kstest
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
@@ -16,8 +15,10 @@ from mpmath import mpf
 from mpsci.distributions.normal import invcdf
 from mpsci.distributions.gamma import cdf as gammacdf
 
-from scipy.stats import norm
 from scipy.stats import gamma
+from scipy.stats import gaussian_kde
+from scipy.stats import kstest
+from scipy.interpolate import interp1d
 
 import blitzgsea.enrichr
 import blitzgsea.plot
@@ -30,8 +31,8 @@ reload(blitzgsea.shuffle)
 
 mp.dps = 1000
 mp.prec = 1000
-global blitzgsea_signature_anchors
-blitzgsea_signature_anchors = {}
+global pdf_cache
+pdf_cache = {}
 
 def strip_gene_set(signature, signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
@@ -232,7 +233,7 @@ def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, 
 
     return gsize, es, nes, pval, legenes
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, shared_null: bool=False, seed: int=0, add_noise: bool=False):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.1, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False):
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -261,15 +262,24 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     for i,h in enumerate(signature.index):
         signature_map[h] = i
 
-    if shared_null and len(blitzgsea_signature_anchors) > 0:
-        sig_hash = list(blitzgsea_signature_anchors.keys())[0]
-    if sig_hash in blitzgsea_signature_anchors.keys() and signature_cache:
+    if shared_null and len(pdf_cache) > 0:
+        kld, sig_hash_temp = best_kl_fit(np.array(signature["v"]), pdf_cache, bins=kl_bins)
+        if kld < kl_threshold:
+            sig_hash = sig_hash_temp
+            if verbose:
+                print(f"Found compatible null model. KL-divergence: {kld}")
+
+    if sig_hash in pdf_cache.keys() and signature_cache:
         if verbose:
             print("Use cached anchor parameters")
-        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = blitzgsea_signature_anchors[sig_hash]
+        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = pdf_cache[sig_hash]["model"]
     else:
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress, max_size=max_size)
-        blitzgsea_signature_anchors[sig_hash] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
+        pdf_cache[sig_hash] = {}
+        xv, pdf = create_pdf(np.array(signature["v"]), kl_bins)
+        pdf_cache[sig_hash]["xvalues"] = xv
+        pdf_cache[sig_hash]["pdf"] = pdf
+        pdf_cache[sig_hash]["model"] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
     
     gsets = []
 
@@ -352,3 +362,30 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
     return res.sort_values("pval", key=abs, ascending=True)
+
+def create_pdf(data, bins=200):
+    x_vals = np.linspace(data.min(), data.max(), num=bins)
+    kde = gaussian_kde(data)
+    return x_vals, kde(x_vals)
+
+def map_density_range(new_range, old_range, old_pdf):
+    pdf_interp = interp1d(old_range, old_pdf, kind='linear', fill_value=0.0, bounds_error=False)
+    return pdf_interp(new_range)
+
+def kl_divergence(p, q):
+    result = 0.0
+    for i in range(len(p)):
+        if p[i] != 0 and q[i] != 0:
+            result += p[i] * np.log2(p[i]/q[i])
+    return result
+
+def best_kl_fit(signature, pdfs, bins=200):
+    xv, pdf = create_pdf(signature, bins)
+    res = []
+    pdf_keys = list(pdfs.keys())
+    for k in pdf_keys:
+        ipdf = map_density_range(xv, pdfs[k]["xvalues"], pdfs[k]["pdf"])
+        k = kl_divergence(pdf, ipdf)
+        res.append(k)
+    min_pos = np.argmin(res)
+    return min_pos, res[min_pos], pdf_keys[min_pos]
