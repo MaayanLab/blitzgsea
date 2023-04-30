@@ -103,6 +103,22 @@ blitzGSEA is currently the fastest GSEA implementation. The most time consuming 
 | `kl_threshold`| float | 0.3 | Controls how similar signature value distributions have to be for reuse. The smaller the more conservative. |
 | `kl_bins`| int | 200 | Number of bins in PDF representation of distributions for KL test. |
 
+### Example
+```python
+
+import blitzgsea as blitz
+import pandas as pd
+
+# read signature as pandas dataframe
+signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
+
+# list available gene set libraries in Enrichr
+blitz.enrichr.print_libraries()
+
+# run enrichment analysis
+result = blitz.gsea(signature, library, shared_null=True)
+```
+
 ### Plotting enrichment results
 
 blitzGSEA supports several plotting functions. `blitzgsea.plot.running_sum()` and `blitzgsea.plot.top_table()` can be used after enrichment has been performed. `blitzgsea.plot.running_sum()` shows the running sum of an individual gene set. It has a `compact` mode in which the image will be more readable if small. `blitzgsea.plot.top_table()` shows the top `n` enriched gene sets and displays the results in a table, with normalized enrichment score (NES) and the distribution of hits relative to the gene ranking of the signature.
@@ -154,7 +170,7 @@ The resulting plots will look like the examples below:
 ### Sample shuffling
 This is the sample shuffling algorithm from GSEApy. It performs a t-test to build signatures for phenotype shuffled groups. The input is a gene expression dataframe, which should be normalized for library size. `groups` is a list containing 0 or 1 describing the corresponding group for the samples in `exprs`. The index of `exprs` are the gene ids matching the gene set library. 
 
-```
+```python
 blitz.shuffle.gsea(exprs, library, groups, permutations=50, seed=1)
 ```
 
