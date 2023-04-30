@@ -162,14 +162,14 @@ The resulting plots will look like the examples below:
 #### running_sum.pdf
 
 <div style="bachground-color: white">
-<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/running_sum.png" width=300>
+<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/raw/main/icon/running_sum.png" width=300>
 </div>
 
 #### running_sum_compact.pdf
-<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/running_sum_compact.png" width=300>
+<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/raw/main/icon/running_sum_compact.png" width=300>
 
 #### top_table.pdf
-<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/top_table.png" width=300>
+<img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/raw/main/icon/top_table.png" width=300>
 
 ### Sample shuffling
 This is the sample shuffling algorithm from GSEApy. It performs a t-test to build signatures for phenotype shuffled groups. The input is a gene expression dataframe, which should be normalized for library size. `groups` is a list containing 0 or 1 describing the corresponding group for the samples in `exprs`. The index of `exprs` are the gene ids matching the gene set library. 
