@@ -16,15 +16,16 @@ from mpsci.distributions.normal import invcdf
 from mpsci.distributions.gamma import cdf as gammacdf
 
 from scipy.stats import gamma
-from scipy.stats import gaussian_kde
 from scipy.stats import kstest
-from scipy.interpolate import interp1d
 
+import blitzgsea.signature_similarity
+from blitzgsea.signature_similarity import create_pdf, map_density_range, kl_divergence, best_kl_fit
 import blitzgsea.enrichr
 import blitzgsea.plot
 import blitzgsea.shuffle
 
 from importlib import reload
+reload(blitzgsea.signature_similarity)
 reload(blitzgsea.enrichr)
 reload(blitzgsea.plot)
 reload(blitzgsea.shuffle)
@@ -89,7 +90,7 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
         es.append(enrichment_score(abs_signature, signature_map, rgenes)[1])
     return es
 
-def get_peak_size_adv(signature, abs_signature, signature_map, size, permutations, seed):
+def get_peak_size_adv(abs_signature, size, permutations, seed):
     random.seed(seed)
     es = []
     number_hits = size
@@ -189,7 +190,7 @@ def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
 def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
-    es = np.array(get_peak_size_adv(signature, abs_signature, signature_map, set_size, permutations, seed))
+    es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, seed))
     pos = [x for x in es if x > 0]
     neg = [x for x in es if x < 0]
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
@@ -219,21 +220,32 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
-def probability_star(args):
-    return probability(*args)
-    
-def probability(signature, abs_signature, signature_map, gene_set, f_alpha_pos, f_beta_pos, f_pos_ratio):
-    gsize = len(gene_set)
-    
-    rs, es = enrichment_score(abs_signature, signature_map, gene_set)
-
-    nes = 0
-    pval = 1
-    legenes = ""
-
-    return gsize, es, nes, pval, legenes
-
 def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False):
+    """
+    Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
+
+    Parameters:
+    signature (array-like): The gene expression signature to analyze.
+    library (array-like): The gene set library to use for enrichment analysis.
+    permutations (int, optional): Number of randomized permutations to estimate ES distributions. Default is 2000.
+    anchors (int, optional): Number of gene set size distributions calculated. Remaining are interpolated. Default is 20.
+    min_size (int, optional): Minimum number of genes in geneset. Default is 5.
+    max_size (int, optional): Maximal number of genes in gene set. Default is 4000.
+    processes (int, optional): Number of parallel threads. Not much gain after 4 threads. Default is 4.
+    symmetric (bool, optional): Use same distribution parameters for negative and positive ES. If False estimate them separately. Default is True.
+    signature_cache (bool, optional): Use precomputed anchor parameters. Default is True.
+    shared_null (bool, optional): Use same null for signatures if a compatible model already exists (uses KL-divergence test). Default is False.
+    kl_threshold (float, optional): Controls how similar signature value distributions have to be for reuse. Default is 0.3.
+    kl_bins (int, optional): Number of bins in PDF representation of distributions for KL test. Default is 200.
+    plotting (bool, optional): Plot estimated anchor parameters. Default is False.
+    verbose (bool, optional): Toggle additional output. Default is False.
+    progress (bool, optional): Toggle progress bar. Default is False.
+    seed (int, optional): Random seed. Same seed will result in identical results. If seed equals -1, generate a random seed. Default is 0.
+    add_noise (bool, optional): Add small random noise to signature. The noise is a fraction of the expression values. Default is False.
+
+    Returns:
+    array-like: Enrichment scores for each gene set in the library.
+    """
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
@@ -364,30 +376,3 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         print('Kolmogorov-Smirnov test failed. Gamma approximation deviates from permutation samples.\n'+"KS p-value (pos): "+str(ks_pos)+"\nKS p-value (neg): "+str(ks_neg))
     
     return res.sort_values("pval", key=abs, ascending=True)
-
-def create_pdf(data, bins=200):
-    x_vals = np.linspace(data.min(), data.max(), num=bins)
-    kde = gaussian_kde(data)
-    return x_vals, kde(x_vals)
-
-def map_density_range(new_range, old_range, old_pdf):
-    pdf_interp = interp1d(old_range, old_pdf, kind='linear', fill_value=0.0, bounds_error=False)
-    return pdf_interp(new_range)
-
-def kl_divergence(p, q):
-    result = 0.0
-    for i in range(len(p)):
-        if p[i] != 0 and q[i] != 0:
-            result += p[i] * np.log2(p[i]/q[i])
-    return result
-
-def best_kl_fit(signature, pdfs, bins=200):
-    xv, pdf = create_pdf(signature, bins)
-    res = []
-    pdf_keys = list(pdfs.keys())
-    for k in pdf_keys:
-        ipdf = map_density_range(xv, pdfs[k]["xvalues"], pdfs[k]["pdf"])
-        k = kl_divergence(pdf, ipdf)
-        res.append(k)
-    min_pos = np.argmin(res)
-    return res[min_pos], pdf_keys[min_pos]

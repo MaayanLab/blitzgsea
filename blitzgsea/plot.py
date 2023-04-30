@@ -5,7 +5,20 @@ from matplotlib.patches import Rectangle
 import blitzgsea as blitz
 
 def running_sum(signature, geneset, library, result=None, compact=False):
-    plt.ioff()
+    """
+    Plot the running sum for a given geneset and signature.
+
+    Parameters:
+    signature (array-like): The gene expression signature to analyze.
+    geneset (str): The name of the gene set for a gene set in the library.
+    library (array-like): The gene set library to use for enrichment analysis.
+    result (array-like, optional): A precomputed enrichment result. Default is None.
+    compact (bool, optional): If True, return a compact representation of the running sum plot for better readability in small plots. Default is False.
+
+    Returns:
+    figure: The running sum plot for the given geneset and signature.
+    """
+    plt.off()
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
@@ -120,6 +133,18 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     return fig
 
 def top_table(signature, library, result, n=10):
+    """
+    Plot a table to enrichment results for top N enriched gene sets for a given geneset and signature.
+
+    Parameters:
+    signature (array-like): The gene expression signature to analyze.
+    library (array-like): The gene set library to use for enrichment analysis.
+    result (array-like, optional): A precomputed enrichment result. Default is None.
+    n (integer): number of top enriched gene sets to be plotted
+    
+    Returns:
+    figure: The running sum plot for the given geneset and signature.
+    """
     sig = signature.sort_values(1, ascending=False).set_index(0)
     sig = sig[~sig.index.duplicated(keep='first')]
 

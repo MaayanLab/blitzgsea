@@ -8,6 +8,15 @@ import re
 import ssl
 
 def get_library(library: str):
+    """
+    Load gene set library from Enrichr as dictionary.
+
+    Parameters:
+    signature (string): Name of Enrichr gene set library.
+
+    Returns:
+    Gene set library as dictionary.
+    """
     return read_gmt(load_library(library))
 
 def list_libraries():
@@ -28,6 +37,12 @@ def load_library(library: str, overwrite: bool = False, verbose: bool = False) -
     return(get_data_path()+library)
 
 def print_libraries():
+    """
+    Retrieve all names of gene set libraries from Enrichr.
+
+    Returns:
+    Array of gene set library names.
+    """
     libs = list_libraries()
     for i in range(0, len(libs)):
         print(str(i)+" - "+libs[i])
