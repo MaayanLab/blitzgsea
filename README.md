@@ -11,7 +11,7 @@ Gene set libraries can directly be loaded from Enrichr (<a href="https://maayanl
 blitzGSEA provides plotting functions to generate publication ready figures similar to the original GSEA-P software. `blitzgsea.plot.running_sum()` plots an enrichment plot for a single gene set and `blitzgsea.plot.top_table()` plots the top `n` gene sets in a compact table. 
 
 # Installation
-
+<span id="#installation"></span>
 blitzGSEA is currently only available as a Python package in this GitHub repository. You can install the blitzGSEA Python package and its dependencies through pip by using the following command:
 
 ```
