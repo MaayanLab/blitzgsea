@@ -82,7 +82,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `anchors`	| int | 20 | Number of gene set size distributions calculated. Remaining are interpolated. |
 | `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
-| `signature_cache` | bool | True | Use precomputed anchor parameters. |
+| `signature_cache` | bool | True | Cache precomputed anchor parameters in memory for later reuse. |
 | `shared_null` | bool | False | Use same null for signatures if a compatible model already exists. (uses KL-divergence test). |
 | `kl_threshold`| float | 0.3 | Controls how similar signature value distributions have to be for reuse. |
 | `kl_bins`| int | 200 | Number of bins in PDF representation of distributions for KL test. |
@@ -91,6 +91,17 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `progress` | bool | False | Toggle progress bar. |
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
 | `add_noise` | bool | False | Add small random noise to signature. The noise is a fraction of the expression values. |
+
+### Speeding up enrichment calculations
+
+blitzGSEA is currently the fastest GSEA implementation. The most time consuming step of blitzGSEA is the generation of a robust null distribution to compute p-values. Since the null distribution depends on the value distribution of the inout signature blitzGSEA will by default compute a new null for each new input signature. blitzGSEA is able to compute the similarity between input signatures using Kullback–Leibler divergence to identify similar signatures to share null models. If a previous signature has a similar value distribution a cached null model is used. The relevant parameters of the `blitzgsea.gsea()` function are shown below:
+
+| parameter name | type | default	| description |
+|:-----|:---------|:-------------|:------|
+| `signature_cache` | bool | True | Cache precomputed anchor parameters in memory for later reuse. |
+| `shared_null` | bool | False | Use same null for signatures if a compatible model already exists. (uses KL-divergence test). |
+| `kl_threshold`| float | 0.3 | Controls how similar signature value distributions have to be for reuse. The smaller the more conservative. |
+| `kl_bins`| int | 200 | Number of bins in PDF representation of distributions for KL test. |
 
 ### Plotting enrichment results
 
