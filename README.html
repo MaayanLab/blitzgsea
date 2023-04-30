@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<p><img title="a title" alt="blitzGSEA" src="https://github.com/MaayanLab/blitzgsea/raw/main/icon/bgsea_small.png" width=200></p>
+<p><a href="#installation">Installation</a> | <a
+href="#python-example">Example</a> | <a
+href="#optional-parameters">Optional Parameters</a> | <a
+href="#speeding-up-enrichment-calculations">Speed-up</a> | <a
+href="#plotting-enrichment-results">Plotting</a> | <a
+href="#attribution">Attribution</a> | <a
+href="#references">References</a></p>
+<h1 id="blitzgsea-introduction">blitzGSEA Introduction</h1>
+<p>This Python package provides a computationally performant <b>G</b>ene
+<b>S</b>et <b>E</b>nrichment <b>A</b>nalysis (GSEA) implementation of
+the pre-rank algorithm [1]. GSEApy was used as the reference for the
+running sum and enrichment score calculation [2]. The algorithm
+estimates the enrichment score (ES) distribution of the null model by
+fitting data to gamma distibutions instead of calculating permutations
+for each gene set. blitzGSEA calculates p-values with much higher
+accuracy than other reference implementations available in Python.</p>
+<p>Gene set libraries can directly be loaded from Enrichr
+(<a href="https://maayanlab.cloud/Enrichr" target="_blank">https://maayanlab.cloud/Enrichr</a>).
+For this use the <code>blitzgsea.enrichr.get_library()</code> function.
+All libraries can also be listed with
+<code>blitzgsea.enrichr.print_libraries()</code>.</p>
+<p>blitzGSEA provides plotting functions to generate publication ready
+figures similar to the original GSEA-P software.
+<code>blitzgsea.plot.running_sum()</code> plots an enrichment plot for a
+single gene set and <code>blitzgsea.plot.top_table()</code> plots the
+top <code>n</code> gene sets in a compact table.</p>
+<h1 id="installation">Installation</h1>
+<p><span id="#installation"></span> blitzGSEA is currently only
+available as a Python package in this GitHub repository. You can install
+the blitzGSEA Python package and its dependencies through pip by using
+the following command:</p>
+<pre><code>$ pip install blitzgsea</code></pre>
+<h1 id="run-enrichment-analysis-using-blitzgsea">Run enrichment analysis
+using blitzGSEA</h1>
+<p>blitzGSEA depends on two input files. 1) a gene signature and 2) a
+gene set library. The gene set library is a dictionary with the name of
+the gene set as key and a list of gene ids as values. Gene set libraries
+can be loaded directly from Enrichr. The signature should be a pandas
+dataframe with two columns [0,1]. The first column should contain the
+gene ids (matching the gene ids in the gene set library).</p>
+<h3 id="python-example">Python example</h3>
+<p>This short example will download two files (signature and gene set
+library). The gene set library consists of KEGG pathways and the
+signature is an example signature of differential gene expression of
+muscle samples from young and old donors. Differential gene expression
+was computed with Limma Voom.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> blitzgsea <span class="im">as</span> blitz</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># read signature as pandas dataframe</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>signature <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># list available gene set libraries in Enrichr</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>blitz.enrichr.print_libraries()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># use enrichr submodule to retrieve gene set library</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>library <span class="op">=</span> blitz.enrichr.get_library(<span class="st">&quot;KEGG_2021_Human&quot;</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># run enrichment analysis</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> blitz.gsea(signature, library)</span></code></pre></div>
+<h3 id="example-input">Example Input</h3>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">index</th>
+<th style="text-align: center;">0</th>
+<th style="text-align: right;">1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">ADO</td>
+<td style="text-align: right;">-7.833439</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">CHUK</td>
+<td style="text-align: right;">-7.800920</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">GOLGA4</td>
+<td style="text-align: right;">-7.78722</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">…</td>
+<td style="text-align: center;">…</td>
+<td style="text-align: right;">…</td>
+</tr>
+</tbody>
+</table>
+<p>The gene set library is a dictionary with the gene set names as key
+and lists of gene ids as values.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;ERBB2 SIGNALING PATHWAY (GO:0038128)&#39;</span>: [<span class="st">&#39;CDC37&#39;</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">&#39;PTPN12&#39;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">&#39;PIK3CA&#39;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">&#39;SOS1&#39;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">&#39;CPNE3&#39;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">&#39;EGF&#39;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                                          ...</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                                         ],</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;HETEROTYPIC CELL-CELL ADHESION (GO:0034113)&#39;</span>: [<span class="st">&#39;DSC2&#39;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                                                 <span class="st">&#39;ITGAV&#39;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                                                 <span class="st">&#39;ITGAD&#39;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                                                 <span class="st">&#39;LILRB2&#39;</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                                                 ...</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                                                ],</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="optional-parameters">Optional Parameters</h3>
+<p>The main function of <code>blitzgsea.gsea()</code> supports several
+optional parameters. The default parameters should work well for most
+use cases.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 27%" />
+<col style="width: 37%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">parameter name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: left;">default</th>
+<th style="text-align: left;">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>permutations</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">2000</td>
+<td style="text-align: left;">Number of randomized permutations to
+estimate ES distributions.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>min_size</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">Minimum number of genes in geneset.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>max_size</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">4000</td>
+<td style="text-align: left;">Maximal number of genes in gene set.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>anchors</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: left;">Number of gene set size distributions
+calculated. Remaining are interpolated.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>processes</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">Number of parallel threads. Not much gain
+after 4 threads.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>symmetric</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Use same distribution parameters for
+negative and positive ES. If <code>False</code> estimate them
+separately.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>signature_cache</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Cache precomputed anchor parameters in
+memory for later reuse.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>shared_null</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Use same null for signatures if a
+compatible model already exists. (uses KL-divergence test).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>kl_threshold</code></td>
+<td style="text-align: left;">float</td>
+<td style="text-align: left;">0.3</td>
+<td style="text-align: left;">Controls how similar signature value
+distributions have to be for reuse.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>kl_bins</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">200</td>
+<td style="text-align: left;">Number of bins in PDF representation of
+distributions for KL test.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>plotting</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Plot estimated anchor parametes.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>verbose</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Toggle additonal output.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>progress</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Toggle progress bar.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>seed</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">Random seed. Same seed will result in
+identical result. If seed equal <code>-1</code> generate random
+seed.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>add_noise</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Add small random noise to signature. The
+noise is a fraction of the expression values.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="speeding-up-enrichment-calculations">Speeding up enrichment
+calculations</h3>
+<p>blitzGSEA is currently the fastest GSEA implementation. The most
+time-consuming step of blitzGSEA is the generation of a robust null
+distribution to compute p-values. Since the null distribution depends on
+the value distribution of the input signature, blitzGSEA will, by
+default, compute a new null for each new input signature. blitzGSEA can
+compute the similarity between input signatures using Kullback–Leibler
+divergence to identify similar signatures to share null models. A cached
+null model is used if a previous signature has a similar value
+distribution. The relevant parameters of the
+<code>blitzgsea.gsea()</code> function are shown below:</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 27%" />
+<col style="width: 37%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">parameter name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: left;">default</th>
+<th style="text-align: left;">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>signature_cache</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">True</td>
+<td style="text-align: left;">Cache precomputed anchor parameters in
+memory for later reuse.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>shared_null</code></td>
+<td style="text-align: left;">bool</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Use same null for signatures if a
+compatible model already exists. (uses KL-divergence test).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>kl_threshold</code></td>
+<td style="text-align: left;">float</td>
+<td style="text-align: left;">0.3</td>
+<td style="text-align: left;">Controls how similar signature value
+distributions have to be for reuse. The smaller the more
+conservative.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>kl_bins</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">200</td>
+<td style="text-align: left;">Number of bins in PDF representation of
+distributions for KL test.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example">Example</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> blitzgsea <span class="im">as</span> blitz</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># read signature as pandas dataframe</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>signature <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv&quot;</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># list available gene set libraries in Enrichr</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>blitz.enrichr.print_libraries()</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># run enrichment analysis</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> blitz.gsea(signature, library, shared_null<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<h3 id="plotting-enrichment-results">Plotting enrichment results</h3>
+<p>blitzGSEA supports several plotting functions.
+<code>blitzgsea.plot.running_sum()</code> and
+<code>blitzgsea.plot.top_table()</code> can be used after enrichment has
+been performed. <code>blitzgsea.plot.running_sum()</code> shows the
+running sum of an individual gene set. It has a <code>compact</code>
+mode in which the image will be more readable if small.
+<code>blitzgsea.plot.top_table()</code> shows the top <code>n</code>
+enriched gene sets and displays the results in a table, with normalized
+enrichment score (NES) and the distribution of hits relative to the gene
+ranking of the signature.</p>
+<h3 id="example-1">Example</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> blitzgsea <span class="im">as</span> blitz</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># read signature as pandas dataframe</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>signature <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv&quot;</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># list available gene set libraries in Enrichr</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>blitz.enrichr.print_libraries()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># use enrichr submodule to retrieve gene set library</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>library <span class="op">=</span> blitz.enrichr.get_library(<span class="st">&quot;KEGG_2021_Human&quot;</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># run enrichment analysis</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> blitz.gsea(signature, library)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the enrichment results and save to pdf</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> blitz.plot.running_sum(signature, <span class="st">&quot;CELL ADHESION MOLECULES&quot;</span>, library, result<span class="op">=</span>result, compact<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>fig.savefig(<span class="st">&quot;running_sum.png&quot;</span>, bbox_inches<span class="op">=</span><span class="st">&#39;tight&#39;</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>fig_compact <span class="op">=</span> blitz.plot.running_sum(signature, <span class="st">&quot;CELL ADHESION MOLECULES&quot;</span>, library, result<span class="op">=</span>result, compact<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>fig_compact.savefig(<span class="st">&quot;running_sum_compact.png&quot;</span>, bbox_inches<span class="op">=</span><span class="st">&#39;tight&#39;</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>fig_table <span class="op">=</span> blitz.plot.top_table(signature, library, result, n<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>fig_table.savefig(<span class="st">&quot;top_table.png&quot;</span>, bbox_inches<span class="op">=</span><span class="st">&#39;tight&#39;</span>)</span></code></pre></div>
+<p>The resulting plots will look like the examples below:</p>
+<h4 id="running_sum.pdf">running_sum.pdf</h4>
+<div style="bachground-color: white">
+<p><img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/running_sum.png" width=300></p>
+</div>
+<h4 id="running_sum_compact.pdf">running_sum_compact.pdf</h4>
+<p><img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/running_sum_compact.png" width=300></p>
+<h4 id="top_table.pdf">top_table.pdf</h4>
+<p><img title="a title" alt="blitzGSEA sunning_sum" src="https://github.com/MaayanLab/blitzgsea/blob/main/icon/top_table.png" width=300></p>
+<h3 id="sample-shuffling">Sample shuffling</h3>
+<p>This is the sample shuffling algorithm from GSEApy. It performs a
+t-test to build signatures for phenotype shuffled groups. The input is a
+gene expression dataframe, which should be normalized for library size.
+<code>groups</code> is a list containing 0 or 1 describing the
+corresponding group for the samples in <code>exprs</code>. The index of
+<code>exprs</code> are the gene ids matching the gene set library.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>blitz.shuffle.gsea(exprs, library, groups, permutations<span class="op">=</span><span class="dv">50</span>, seed<span class="op">=</span><span class="dv">1</span>)</span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 27%" />
+<col style="width: 37%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">parameter name</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: left;">default</th>
+<th style="text-align: left;">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>exprs</code></td>
+<td style="text-align: left;">pd.DataFrame</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Normalized gene expression matrix.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>library</code></td>
+<td style="text-align: left;">dictionary</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Gene set library.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>groups</code></td>
+<td style="text-align: left;">list</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Phenotype group labels of samples. Labels
+are 0 or 1.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>permutations</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">1000</td>
+<td style="text-align: left;">Number of permutations.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>seed</code></td>
+<td style="text-align: left;">int</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">Random state seed.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="dependencies">Dependencies</h1>
+<p>Python 3.6+</p>
+<h1 id="attribution">Attribution</h1>
+<p>The statistical tool was developed by the <a
+href="%5Bhttps://www.google.com%5D(https://labs.icahn.mssm.edu/maayanlab/)">Ma’ayan
+Laboratory</a>. When using blitzgsea please cite the following
+reference:</p>
+<p>Lachmann, Alexander, Zhuorui Xie, and Avi Ma’ayan. “blitzGSEA:
+efficient computation of gene set enrichment analysis through gamma
+distribution approximation.” Bioinformatics (2022).
+https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btac076/6526383?login=false</p>
+<h1 id="references">References</h1>
+<p>[1] Lachmann, Alexander, Zhuorui Xie, and Avi Ma’ayan. “blitzGSEA:
+efficient computation of gene set enrichment analysis through gamma
+distribution approximation.” Bioinformatics (2022).</p>
+<p>[2] Subramanian, Aravind, Heidi Kuehn, Joshua Gould, Pablo Tamayo,
+and Jill P. Mesirov. “GSEA-P: a desktop application for Gene Set
+Enrichment Analysis.” Bioinformatics 23, no. 23 (2007): 3251-3253.</p>
+<p>[3] Fang, Zhuoqing, Xinyuan Liu, and Gary Peltz. “GSEApy: a
+comprehensive package for performing gene set enrichment analysis in
+Python.” Bioinformatics (2022).</p>
+</body>
+</html>
