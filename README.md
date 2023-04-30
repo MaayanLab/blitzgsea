@@ -20,6 +20,29 @@ $ pip install blitzgsea
 
 blitzGSEA depends on two input files. 1) a gene signature and 2) a gene set library. The gene set library is a dictionary with the name of the gene set as key and a list of gene ids as values. Gene set libraries can be loaded directly from Enrichr. The signature should be a pandas dataframe with two columns [0,1]. The first column should contain the gene ids (matching the gene ids in the gene set library).
 
+### Python example
+
+This short example will download two files (signature and gene set library). The gene set library consists of KEGG pathways and the signature is an example signature of differential gene expression of muscle samples from young and old donors. Differential gene expression was computed with Limma Voom.
+
+```python
+import blitzgsea as blitz
+import pandas as pd
+
+# read signature as pandas dataframe
+signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
+
+# list available gene set libraries in Enrichr
+blitz.enrichr.print_libraries()
+
+# use enrichr submodule to retrieve gene set library
+library = blitz.enrichr.get_library("KEGG_2021_Human")
+
+# run enrichment analysis
+result = blitz.gsea(signature, library)
+```
+
+### Example Input
+
 | index | 0	| 1 |
 |:-----|:-------------:|------:|
 | 1	| ADO	| -7.833439 |
@@ -49,27 +72,6 @@ The gene set library is a dictionary with the gene set names as key and lists of
 }
 ```
 
-### Python example
-
-This short example will download two files (signature and gene set library). The gene set library consists of KEGG pathways and the signature is an example signature of differential gene expression of muscle samples from young and old donors. Differential gene expression was computed with Limma Voom.
-
-```python
-import blitzgsea as blitz
-import pandas as pd
-
-# read signature as pandas dataframe
-signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
-
-# list available gene set libraries in Enrichr
-blitz.enrichr.print_libraries()
-
-# use enrichr submodule to retrieve gene set library
-library = blitz.enrichr.get_library("KEGG_2021_Human")
-
-# run enrichment analysis
-result = blitz.gsea(signature, library)
-```
-
 ### Optional Parameters
 
 The main function of `blitzgsea.gsea()` supports several optional parameters. The default parameters should work well for most use cases. 
@@ -94,7 +96,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 
 ### Speeding up enrichment calculations
 
-blitzGSEA is currently the fastest GSEA implementation. The most time consuming step of blitzGSEA is the generation of a robust null distribution to compute p-values. Since the null distribution depends on the value distribution of the inout signature blitzGSEA will by default compute a new null for each new input signature. blitzGSEA is able to compute the similarity between input signatures using Kullback–Leibler divergence to identify similar signatures to share null models. If a previous signature has a similar value distribution a cached null model is used. The relevant parameters of the `blitzgsea.gsea()` function are shown below:
+blitzGSEA is currently the fastest GSEA implementation. The most time-consuming step of blitzGSEA is the generation of a robust null distribution to compute p-values. Since the null distribution depends on the value distribution of the input signature, blitzGSEA will, by default, compute a new null for each new input signature. blitzGSEA can compute the similarity between input signatures using Kullback–Leibler divergence to identify similar signatures to share null models. A cached null model is used if a previous signature has a similar value distribution. The relevant parameters of the `blitzgsea.gsea()` function are shown below:
 
 | parameter name | type | default	| description |
 |:-----|:---------|:-------------|:------|
