@@ -1,10 +1,10 @@
 loess==2.1.2
 matplotlib==3.6.0
 mpmath==1.2.1
-mpsci==0.0.1.dev73
+mpsci @ git+https://github.com/warrenweckesser/mpsci.git
 numpy==1.24.3
 pandas==2.0.1
 scipy==1.10.1
-setuptools==58.0.4
-statsmodels==0.13.2
+setuptools==67.7.2
+statsmodels==0.13.5
 tqdm==4.64.1
