@@ -142,20 +142,20 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     if np.max(pos_ratio) > 1.5 and verbose:
         print('Significant unbalance between positive and negative enrichment scores detected. Signature values are not centered close to 0.')
 
-    x = np.array(x, dtype=float)
+    anchor_set_sizes = np.array(anchor_set_sizes, dtype=float)
     
-    f_alpha_pos = loess_interpolation(x, alpha_pos)
-    f_beta_pos = loess_interpolation(x, beta_pos, frac=0.2)
+    f_alpha_pos = loess_interpolation(anchor_set_sizes, alpha_pos)
+    f_beta_pos = loess_interpolation(anchor_set_sizes, beta_pos, frac=0.2)
     
-    f_alpha_neg = loess_interpolation(x, alpha_neg)
-    f_beta_neg = loess_interpolation(x, beta_neg, frac=0.2)
+    f_alpha_neg = loess_interpolation(anchor_set_sizes, alpha_neg)
+    f_beta_neg = loess_interpolation(anchor_set_sizes, beta_neg, frac=0.2)
 
     # fix issue with numeric instability
     pos_ratio = pos_ratio - np.abs(0.0001*np.random.randn(len(pos_ratio)))
-    f_pos_ratio = loess_interpolation(x, pos_ratio)
+    f_pos_ratio = loess_interpolation(anchor_set_sizes, pos_ratio)
     
     if plotting:
-        xx = np.linspace(min(x), max(x), 1000)
+        xx = np.linspace(min(anchor_set_sizes), max(anchor_set_sizes), 1000)
         
         plt.figure(0)
         
@@ -172,17 +172,17 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
         yy = f_beta_pos(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3)
-        plt.plot(x, beta_pos, 'ko')
+        plt.plot(anchor_set_sizes, beta_pos, 'ko')
         
         yy = f_beta_neg(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3, c="orange")
-        plt.plot(x, beta_neg, 'o', c="coral")
+        plt.plot(anchor_set_sizes, beta_neg, 'o', c="coral")
         
         yy = f_pos_ratio(xx)
         plt.figure(2)
         plt.plot(xx, yy, lw=3)
-        plt.plot(x, pos_ratio, 'o', c="black")
+        plt.plot(anchor_set_sizes, pos_ratio, 'o', c="black")
         
     return f_alpha_pos, f_beta_pos, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
 

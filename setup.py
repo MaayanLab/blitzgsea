@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="blitzgsea",
-    version="1.3.12",
+    version="1.3.13",
     author="Alexander Lachmann",
     author_email="alexander.lachmann@mssm.edu",
     description="Package for fast calculation of GSEA similar to prerank using gamma distribution approximation.",
