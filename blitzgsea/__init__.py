@@ -2,6 +2,7 @@ import random
 import numpy as np
 import pandas as pd
 from loess.loess_1d import loess_1d
+from statsmodels.nonparametric.smoothers_lowess import lowess
 from collections import Counter
 from scipy import interpolate
 
@@ -102,8 +103,10 @@ def get_peak_size_adv(abs_signature, size, permutations, seed):
 
 def loess_interpolation(x, y, frac=0.5):
     yl = np.array(y)
-    xout, yout, wout = loess_1d(x, yl, frac=frac)
-    return interpolate.interp1d(xout, yout)
+    #xout, yout, wout = loess_1d(x, yl, frac=frac)
+    #return interpolate.interp1d(xout, yout)
+    yout = lowess(y, x, frac=frac)[:, 1]
+    return interpolate.interp1d(x, yout)
 
 def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, max_size=4000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, verbose=False, progress=False, seed: int=0):
     ll = []
