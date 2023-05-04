@@ -18,7 +18,7 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     Returns:
     figure: The running sum plot for the given geneset and signature.
     """
-    plt.off()
+    plt.ioff()
     signature = signature.sort_values(1, ascending=False).set_index(0)
     signature = signature[~signature.index.duplicated(keep='first')]
     
