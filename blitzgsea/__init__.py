@@ -11,16 +11,16 @@ from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
 import multiprocessing
 
-from mpmath import mp
-from mpmath import mpf
-from mpsci.distributions.normal import invcdf
-from mpsci.distributions.gamma import cdf as gammacdf
+from mpmath import mp, mpf
+#from mpsci.distributions.normal import invcdf
+#from mpsci.distributions.gamma import cdf as gammacdf
 
 from scipy.stats import gamma
 from scipy.stats import kstest
 
 import blitzgsea.signature_similarity
 from blitzgsea.signature_similarity import create_pdf, map_density_range, kl_divergence, best_kl_fit
+from blitzgsea.mpsci import gammacdf, invcdf
 import blitzgsea.enrichr
 import blitzgsea.plot
 import blitzgsea.shuffle
@@ -28,6 +28,7 @@ import blitzgsea.shuffle
 from importlib import reload
 reload(blitzgsea.signature_similarity)
 reload(blitzgsea.enrichr)
+reload(blitzgsea.mpsci)
 reload(blitzgsea.plot)
 reload(blitzgsea.shuffle)
 
