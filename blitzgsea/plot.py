@@ -87,7 +87,7 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     
     if compact:
         ax1 = fig.add_subplot(ax[4:, 0:11])
-        rank_vec = signature[1]
+        rank_vec = signature["v"]
         ax1.vlines(x=hits, ymin=0, ymax=1, color=(0,0,0,1), lw=1.5)
         plt.xlim([0, len(running_sum)])
         plt.ylim([0, 1])
@@ -114,7 +114,7 @@ def running_sum(signature, geneset, library, result=None, compact=False):
         ax1.set(yticks=[])
         ax1.set(xticks=[])
         ax1 = fig.add_subplot(ax[8:, 0:11])
-        rank_vec = signature[1]
+        rank_vec = signature["v"]
         x = np.arange(0.0, len(rank_vec), 20).astype("int")
         x = np.append(x, signature.shape[0]-1)
         ax1.fill_between(x, np.array(rank_vec)[x], color="lightgrey")
