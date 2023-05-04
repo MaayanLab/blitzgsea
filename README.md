@@ -116,9 +116,6 @@ import pandas as pd
 # read signature as pandas dataframe
 signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
 
-# list available gene set libraries in Enrichr
-blitz.enrichr.print_libraries()
-
 # run enrichment analysis
 result = blitz.gsea(signature, library, shared_null=True)
 ```
@@ -136,9 +133,6 @@ import pandas as pd
 # read signature as pandas dataframe
 signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
 
-# list available gene set libraries in Enrichr
-blitz.enrichr.print_libraries()
-
 # use enrichr submodule to retrieve gene set library
 library = blitz.enrichr.get_library("KEGG_2021_Human")
 
@@ -146,10 +140,10 @@ library = blitz.enrichr.get_library("KEGG_2021_Human")
 result = blitz.gsea(signature, library)
 
 # plot the enrichment results and save to pdf
-fig = blitz.plot.running_sum(signature, "CELL ADHESION MOLECULES", library, result=result, compact=False)
+fig = blitz.plot.running_sum(signature, "Cell adhesion molecules", library, result=result, compact=False)
 fig.savefig("running_sum.png", bbox_inches='tight')
 
-fig_compact = blitz.plot.running_sum(signature, "CELL ADHESION MOLECULES", library, result=result, compact=True)
+fig_compact = blitz.plot.running_sum(signature, "Cell adhesion molecules", library, result=result, compact=True)
 fig_compact.savefig("running_sum_compact.png", bbox_inches='tight')
 
 fig_table = blitz.plot.top_table(signature, library, result, n=15)
