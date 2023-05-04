@@ -19,7 +19,9 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     figure: The running sum plot for the given geneset and signature.
     """
     plt.ioff()
-    signature = signature.sort_values(1, ascending=False).set_index(0)
+    signature = signature.copy()
+    signature.columns = ["i","v"]
+    signature = signature.sort_values("v", ascending=False).set_index("i")
     signature = signature[~signature.index.duplicated(keep='first')]
     
     signature_map = {}
@@ -145,7 +147,9 @@ def top_table(signature, library, result, n=10):
     Returns:
     figure: The running sum plot for the given geneset and signature.
     """
-    sig = signature.sort_values(1, ascending=False).set_index(0)
+    signature = signature.copy()
+    signature.columns = ["i","v"]
+    sig = signature.sort_values("v", ascending=False).set_index("i")
     sig = sig[~sig.index.duplicated(keep='first')]
 
     plt.ioff()

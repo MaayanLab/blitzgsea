@@ -251,6 +251,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
+    signature = signature.copy()
     signature.columns = ["i","v"]
     if permutations < 1000 and not symmetric:
         if verbose:
