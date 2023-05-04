@@ -1,7 +1,6 @@
 import random
 import numpy as np
 import pandas as pd
-from loess.loess_1d import loess_1d
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from collections import Counter
 from scipy import interpolate
@@ -12,14 +11,12 @@ from statsmodels.stats.multitest import multipletests
 import multiprocessing
 
 from mpmath import mp, mpf
-#from mpsci.distributions.normal import invcdf
-#from mpsci.distributions.gamma import cdf as gammacdf
 
 from scipy.stats import gamma
 from scipy.stats import kstest
 
 import blitzgsea.signature_similarity
-from blitzgsea.signature_similarity import create_pdf, map_density_range, kl_divergence, best_kl_fit
+from blitzgsea.signature_similarity import create_pdf, best_kl_fit
 from blitzgsea.mpsci import gammacdf, invcdf
 import blitzgsea.enrichr
 import blitzgsea.plot
