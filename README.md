@@ -15,7 +15,7 @@ blitzGSEA provides plotting functions to generate publication ready figures simi
 blitzGSEA is currently only available as a Python package in this GitHub repository. You can install the blitzGSEA Python package and its dependencies through pip by using the following command:
 
 ```
-$ pip install git+https://github.com/maayanlab/blitzgsea
+$ pip install blitzgsea
 ```
 
 # Run enrichment analysis using blitzGSEA
