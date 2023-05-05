@@ -21,6 +21,7 @@ def invcdf(p, mu=0, sigma=1):
     This function is also known as the quantile function or the percent
     point function.
     """
+    p = min(max(p, -1), 1)
     with mp.extradps(mp.dps):
         mu = mp.mpf(mu)
         sigma = mp.mpf(sigma)
