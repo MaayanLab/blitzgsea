@@ -222,7 +222,7 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=50):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
 
@@ -308,7 +308,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     ness = []
     set_size = []
     legeness = []
-    
+    ccc = 0
     for k in tqdm(keys, desc="Enrichment ", disable=not verbose):
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
@@ -321,14 +321,14 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             pos_beta = f_beta_pos(gsize)
             pos_ratio = f_pos_ratio(gsize)
 
-            mp.dps = 50
-            mp.prec = 50
+            mp.dps = accuracy
+            mp.prec = accuracy
 
             if es > 0:
                 prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
                 if prob > 0.99999999:
-                    mp.dps = 500
-                    mp.prec = 500
+                    mp.dps = accuracy
+                    mp.prec = accuracy
                     prob = gammacdf(es, float(pos_alpha), float(pos_beta))
                 #prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
                 prob_two_tailed = np.min([0.5,(1-np.min([prob*pos_ratio+1-pos_ratio,1]))])
@@ -340,23 +340,22 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
             else:
                 prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
                 if prob > 0.99999999:
-                    mp.dps = 500
-                    mp.prec = 500
+                    mp.dps = accuracy
+                    mp.prec = accuracy
                     prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
                 # prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
                 prob_two_tailed = np.min([0.5,(1-np.min([(((prob)-(prob*pos_ratio))+pos_ratio),1]))])
                 nes = invcdf(mpf(np.min([1,prob_two_tailed])))
                 pval = 2*prob_two_tailed
             
-            mp.dps = 50
-            mp.prec = 50
+            mp.dps = accuracy
+            mp.prec = accuracy
 
             ness.append(float(nes))
             ess.append(float(es))
             pvals.append(float(pval))
             set_size.append(gsize)
             legeness.append(legenes)
-
     if not verbose:
         np.seterr(divide = 'ignore')
     
