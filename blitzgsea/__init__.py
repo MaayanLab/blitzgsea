@@ -34,7 +34,7 @@ mp.prec = 1000
 global pdf_cache
 pdf_cache = {}
 
-def strip_gene_set(signature, signature_genes, gene_set):
+def strip_gene_set(signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
 
 def enrichment_score(abs_signature, signature_map, gene_set):
@@ -169,7 +169,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3, c="orange")
         plt.plot(anchor_set_sizes, alpha_neg, 'o', c="coral")
-
+        
         yy = f_beta_pos(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3)
@@ -283,7 +283,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     signature_map = {}
     for i,h in enumerate(signature.index):
         signature_map[h] = i
-
+    
     if shared_null and len(pdf_cache) > 0:
         kld, sig_hash_temp = best_kl_fit(np.array(signature["v"]), pdf_cache, bins=kl_bins)
         if kld < kl_threshold:
@@ -317,7 +317,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     legeness = []
 
     for k in tqdm(keys, desc="Enrichment ", disable=not verbose):
-        stripped_set = strip_gene_set(signature, signature_genes, library[k])
+        stripped_set = strip_gene_set(signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
             gsets.append(k)
             gsize = len(stripped_set)
