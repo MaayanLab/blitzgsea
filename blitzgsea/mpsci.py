@@ -2,8 +2,10 @@
 
 from mpmath import mp
 import math
+from scipy.stats import norm, gamma
 
-def gammacdf(x, k, theta):
+
+def gammacdf_old(x, k, theta):
     """
     Gamma distribution cumulative distribution function.
     k is the shape parameter
@@ -16,7 +18,13 @@ def gammacdf(x, k, theta):
             return mp.zero
         return mp.gammainc(k, 0, x/theta, regularized=True)
 
-def invcdf(p, mu=0, sigma=1):
+def gammacdf(x, k, theta):
+    log_sf_value = gamma.logsf(x, k, scale=theta)
+    sf_value = mp.exp(log_sf_value)
+    cdf_value = 1 - sf_value
+    return cdf_value
+
+def invcdf_old(p, mu=0, sigma=1):
     """
     Normal distribution inverse CDF.
     This function is also known as the quantile function or the percent
@@ -35,3 +43,11 @@ def invcdf(p, mu=0, sigma=1):
             print("The problem value is: ", p)
             quit()
         return x
+
+def invcdf(p, mu=0, sigma=1):
+    p = float(p)
+    if math.isnan(p):
+        p = 1
+    p = min(max(p, 0), 1)
+    n = norm.isf(p)
+    return n

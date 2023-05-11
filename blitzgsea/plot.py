@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
 import blitzgsea as blitz
 
-def running_sum(signature, geneset, library, result=None, compact=False):
+def running_sum(signature, geneset, library, result=None, compact=False, center=True):
     """
     Plot the running sum for a given geneset and signature.
 
@@ -14,7 +14,8 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     library (array-like): The gene set library to use for enrichment analysis.
     result (array-like, optional): A precomputed enrichment result. Default is None.
     compact (bool, optional): If True, return a compact representation of the running sum plot for better readability in small plots. Default is False.
-
+    center (bool, optional): Center signature values. This is generally a good idea.
+    
     Returns:
     figure: The running sum plot for the given geneset and signature.
     """
@@ -23,7 +24,8 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     signature.columns = ["i","v"]
     signature = signature.sort_values("v", ascending=False).set_index("i")
     signature = signature[~signature.index.duplicated(keep='first')]
-    
+    if center:
+        signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
     signature_map = {}
     for i,h in enumerate(signature.index):
         signature_map[h] = i
@@ -134,7 +136,7 @@ def running_sum(signature, geneset, library, result=None, compact=False):
     fig.patch.set_facecolor('white')
     return fig
 
-def top_table(signature, library, result, n=10):
+def top_table(signature, library, result, n=10, center=True):
     """
     Plot a table to enrichment results for top N enriched gene sets for a given geneset and signature.
 
@@ -151,7 +153,8 @@ def top_table(signature, library, result, n=10):
     signature.columns = ["i","v"]
     sig = signature.sort_values("v", ascending=False).set_index("i")
     sig = sig[~sig.index.duplicated(keep='first')]
-
+    if center:
+        signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
     plt.ioff()
     fig = plt.figure(figsize=(5,0.5*n), frameon=False)
     ax = fig.add_subplot(111)

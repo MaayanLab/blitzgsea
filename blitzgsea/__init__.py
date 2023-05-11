@@ -89,10 +89,9 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
         es.append(enrichment_score(abs_signature, signature_map, rgenes)[1])
     return es
 
-def get_peak_size_adv(abs_signature, size, permutations, seed):
+def get_peak_size_adv(abs_signature, number_hits, permutations, seed):
     random.seed(seed)
     es = []
-    number_hits = size
     hit_indicator = np.zeros(len(abs_signature))
     hit_indicator[0:number_hits] = 1
     for i in range(permutations):
@@ -193,10 +192,13 @@ def estimate_anchor_star(args):
 
 def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
     es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, seed))
-    pos = [x for x in es if x > 0]
-    neg = [x for x in es if x < 0]
+    
+    pos = es[np.where(es > 0)[0]]
+    neg = es[np.where(es < 0)[0]]
+
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
-        symmetric = True
+        symmetric = False
+    
     if symmetric:
         aes = np.abs(es)
         fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
@@ -218,11 +220,12 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
         ks_neg = kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
         alpha_neg = fit_alpha
         beta_neg = fit_beta
+
     pos_ratio = len(pos)/(len(pos)+len(neg))
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=50):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=200, center=True):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
 
@@ -244,7 +247,8 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     progress (bool, optional): Toggle progress bar. Default is False.
     seed (int, optional): Random seed. Same seed will result in identical results. If seed equals -1, generate a random seed. Default is 0.
     add_noise (bool, optional): Add small random noise to signature. The noise is a fraction of the expression values. Default is False.
-
+    center (bool, optional): Center signature values. This is generally a good idea. Default is True
+    
     Returns:
     array-like: Enrichment scores for each gene set in the library.
     """
@@ -271,8 +275,11 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     signature = signature.sort_values("v", ascending=False).set_index("i")
     signature = signature[~signature.index.duplicated(keep='first')]
     
-    abs_signature = np.array(np.abs(signature.iloc[:,0]))
+    if center:
+        signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
 
+    abs_signature = np.array(np.abs(signature.loc[:,"v"]))
+    
     signature_map = {}
     for i,h in enumerate(signature.index):
         signature_map[h] = i
@@ -308,7 +315,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     ness = []
     set_size = []
     legeness = []
-    ccc = 0
+
     for k in tqdm(keys, desc="Enrichment ", disable=not verbose):
         stripped_set = strip_gene_set(signature, signature_genes, library[k])
         if len(stripped_set) >= min_size and len(stripped_set) <= max_size:
@@ -319,33 +326,34 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
 
             pos_alpha = f_alpha_pos(gsize)
             pos_beta = f_beta_pos(gsize)
-            pos_ratio = f_pos_ratio(gsize)
+            pos_ratio = max(0, min(1.0, f_pos_ratio(gsize)))
 
             mp.dps = accuracy
             mp.prec = accuracy
 
             if es > 0:
                 prob = gamma.cdf(es, float(pos_alpha), scale=float(pos_beta))
-                if prob > 0.99999999:
-                    mp.dps = accuracy
-                    mp.prec = accuracy
+                if prob > 0.999999999:
+                    mp.dps = deep_accuracy
+                    mp.prec = deep_accuracy
                     prob = gammacdf(es, float(pos_alpha), float(pos_beta))
-                #prob_two_tailed = np.min([0.5,(1-np.min([(1-pos_ratio)+prob*pos_ratio,1]))])
                 prob_two_tailed = np.min([0.5,(1-np.min([prob*pos_ratio+1-pos_ratio,1]))])
                 if prob_two_tailed == 1:
                     nes = 0
                 else:
-                    nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
+                    #nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
+                    nes = invcdf(1-np.min([1,prob_two_tailed]))
                 pval = 2*prob_two_tailed
             else:
                 prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
-                if prob > 0.99999999:
-                    mp.dps = accuracy
-                    mp.prec = accuracy
+                if prob > 0.999999999:
+                    mp.dps = deep_accuracy
+                    mp.prec = deep_accuracy
                     prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
                 # prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
                 prob_two_tailed = np.min([0.5,(1-np.min([(((prob)-(prob*pos_ratio))+pos_ratio),1]))])
-                nes = invcdf(mpf(np.min([1,prob_two_tailed])))
+                #nes = invcdf(mpf(np.min([1,prob_two_tailed])))
+                nes = invcdf(np.min([1,prob_two_tailed]))
                 pval = 2*prob_two_tailed
             
             mp.dps = accuracy
