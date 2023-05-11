@@ -14,11 +14,9 @@ def map_density_range(new_range, old_range, old_pdf):
     return pdf_interp(new_range)
 
 def kl_divergence(p, q):
-    result = 0.0
-    for i in range(len(p)):
-        if p[i] != 0 and q[i] != 0:
-            result += p[i] * np.log2(p[i]/q[i])
-    return result
+    is_finite = (p != 0) & (q != 0)
+    p, q = p[is_finite], q[is_finite]
+    return np.sum(p * (np.log2(p) - np.log2(q)))
 
 def best_kl_fit(signature, pdfs, bins=200):
     xv, pdf = create_pdf(signature, bins)
