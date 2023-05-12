@@ -48,8 +48,8 @@ def print_libraries():
         print(str(i)+" - "+libs[i])
 
 def read_gmt(gmt_file: str, background_genes: List[str]=[], verbose=False):
-    file = open(gmt_file, 'r')
-    lines = file.readlines()
+    with open(gmt_file, 'r') as file:
+        lines = file.readlines()
     library = {}
     background_set = {}
     if len(background_genes) > 1:
@@ -74,7 +74,8 @@ def read_gmt(gmt_file: str, background_genes: List[str]=[], verbose=False):
 def load_json(url):
     context = ssl._create_unverified_context()
     req = urllib.request.Request(url)
-    r = urllib.request.urlopen(req, context=context).read()
+    with urllib.request.urlopen(req, context=context) as fr:
+        r = fr.read()
     return(json.loads(r.decode('utf-8')))
 
 def get_config():
