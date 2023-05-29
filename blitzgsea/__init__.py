@@ -118,9 +118,13 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     anchor_set_sizes = sorted(list(set(np.append([1,4,6, np.min([max_size, np.max(ll)]), np.min([max_size, int(signature.shape[0]/2)]), np.min([max_size, signature.shape[0]-1])], nn).astype("int"))))
     anchor_set_sizes = [x for x in anchor_set_sizes if x < signature.shape[0]]
 
-    with multiprocessing.Pool(processes) as pool:
-        args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes]
-        results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args), disable=not progress))
+    if processes == 1:
+        process_generator = (estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed+xx) for xx in anchor_set_sizes)
+    else:
+        with multiprocessing.Pool(processes) as pool:
+            args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes]
+            process_generator = pool.imap(estimate_anchor_star, args)
+    results = list(tqdm(process_generator, desc="Calibration", total=len(anchor_set_sizes), disable=not progress))
 
     alpha_pos = []
     beta_pos = []
