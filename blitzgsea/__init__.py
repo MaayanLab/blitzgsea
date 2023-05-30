@@ -119,7 +119,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     anchor_set_sizes = [x for x in anchor_set_sizes if x < signature.shape[0]]
 
     if processes == 1:
-        process_generator = (estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed+xx) for xx in anchor_set_sizes)
+        process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes)
     else:
         with multiprocessing.Pool(processes) as pool:
             args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes]
