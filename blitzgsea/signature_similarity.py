@@ -24,7 +24,7 @@ def best_kl_fit(signature, pdfs, bins=200):
     pdf_keys = list(pdfs.keys())
     for k in pdf_keys:
         ipdf = map_density_range(xv, pdfs[k]["xvalues"], pdfs[k]["pdf"])
-        k = kl_divergence(pdf, ipdf)
+        k = (kl_divergence(pdf, ipdf)+kl_divergence(ipdf,pdf))/2
         res.append(k)
     min_pos = np.argmin(res)
     return res[min_pos], pdf_keys[min_pos]
