@@ -12,3 +12,6 @@ devtest*
 dist*
 pypi_push.sh
 README.html
+testing
+*Reactome*
+*GO_Bio*
