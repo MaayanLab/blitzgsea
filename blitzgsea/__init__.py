@@ -303,11 +303,12 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = pdf_cache[sig_hash]["model"]
     else:
         f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress, max_size=max_size)
-        pdf_cache[sig_hash] = {}
         xv, pdf = create_pdf(np.array(signature["v"]), kl_bins)
-        pdf_cache[sig_hash]["xvalues"] = xv
-        pdf_cache[sig_hash]["pdf"] = pdf
-        pdf_cache[sig_hash]["model"] = (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg)
+        pdf_cache[sig_hash] = {
+            "xvalues": xv,
+            "pdf": pdf,
+            "model": (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg),
+        }
     
     gsets = []
 
