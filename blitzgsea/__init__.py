@@ -116,7 +116,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     ll = [len(library[l]) for l in library]
     nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
     anchor_set_sizes = sorted(list(set(np.append([1,4,6, np.min([max_size, np.max(ll)]), np.min([max_size, int(signature.shape[0]/2)]), np.min([max_size, signature.shape[0]-1])], nn).astype("int"))))
-    anchor_set_sizes = [x for x in anchor_set_sizes if x < signature.shape[0]]
+    anchor_set_sizes = [int(x) for x in anchor_set_sizes if x < signature.shape[0]]
 
     if processes == 1:
         process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes)
