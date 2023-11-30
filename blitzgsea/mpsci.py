@@ -1,11 +1,10 @@
 # this is directly copied from the fantastic project https://github.com/WarrenWeckesser/mpsci
 
-from mpmath import mp
+from mpmath import mp, exp, log
 import math
 from scipy.stats import norm, gamma
 
-
-def gammacdf_old(x, k, theta):
+def gammacdf(x, k, theta):
     """
     Gamma distribution cumulative distribution function.
     k is the shape parameter
@@ -16,12 +15,18 @@ def gammacdf_old(x, k, theta):
         x = mp.mpf(x)
         if x < 0:
             return mp.zero
-        return mp.gammainc(k, 0, x/theta, regularized=True)
+        return float(mp.gammainc(k, 0, x/theta, regularized=True))
 
-def gammacdf(x, k, theta):
+def gammacdf1(x, k, theta):
     log_sf_value = gamma.logsf(x, k, scale=theta)
     sf_value = mp.exp(log_sf_value)
     cdf_value = 1 - sf_value
+    return cdf_value
+
+def gammacdf2(x, k, theta):
+    log_sf_value = mp.log(1 - mp.gammainc(k, a=x/theta, regularized=True))
+    sf_value = exp(log_sf_value)
+    cdf_value = mp.mpf(1) - sf_value
     return cdf_value
 
 def invcdf_old(p, mu=0, sigma=1):

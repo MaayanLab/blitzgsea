@@ -229,7 +229,7 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=200, center=True):
+def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
 
@@ -346,7 +346,6 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
                 if prob_two_tailed == 1:
                     nes = 0
                 else:
-                    #nes = invcdf(mpf(1)-mpf(np.min([1,prob_two_tailed])))
                     nes = invcdf(1-np.min([1,prob_two_tailed]))
                 pval = 2*prob_two_tailed
             else:
@@ -355,9 +354,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
                     mp.dps = deep_accuracy
                     mp.prec = deep_accuracy
                     prob = gammacdf(-es, float(pos_alpha), float(pos_beta))
-                # prob_two_tailed = np.min([0.5,(1-np.min([prob*(1-pos_ratio)+pos_ratio,1]))])
                 prob_two_tailed = np.min([0.5,(1-np.min([(((prob)-(prob*pos_ratio))+pos_ratio),1]))])
-                #nes = invcdf(mpf(np.min([1,prob_two_tailed])))
                 nes = invcdf(np.min([1,prob_two_tailed]))
                 pval = 2*prob_two_tailed
             
