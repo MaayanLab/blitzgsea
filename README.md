@@ -150,6 +150,11 @@ fig_compact.savefig("running_sum_compact.png", bbox_inches='tight')
 fig_table = blitz.plot.top_table(signature, library, result, n=15)
 fig_table.savefig("top_table.png", bbox_inches='tight')
 
+# disable switching of interactive plotting, which can cause issues in jupyter notebooks
+# will plot the figure into the notebook
+fig = blitz.plot.running_sum(signature, "Cell adhesion molecules", library, result=result, compact=False, interactive_plot=True)
+fig_table = blitz.plot.top_table(signature, library, result, n=15, interactive_plot=True)
+
 ```
 
 The resulting plots will look like the examples below:
