@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
 import blitzgsea as blitz
 
-def running_sum(signature, geneset, library, result=None, compact=False, center=True):
+def running_sum(signature, geneset, library, result=None, compact=False, center=True, interactive_plot=False):
     """
     Plot the running sum for a given geneset and signature.
 
@@ -19,7 +19,8 @@ def running_sum(signature, geneset, library, result=None, compact=False, center=
     Returns:
     figure: The running sum plot for the given geneset and signature.
     """
-    plt.ioff()
+    if not interactive_plot:
+        plt.ioff()
     signature = signature.copy()
     signature.columns = ["i","v"]
     signature = signature.sort_values("v", ascending=False).set_index("i")
@@ -132,11 +133,12 @@ def running_sum(signature, geneset, library, result=None, compact=False, center=
         plt.xlabel("Rank in Ordered Dataset", fontsize=16)
         plt.ylabel("Ranked list metric", fontsize=16)
         ax1.tick_params(labelsize=16)
-    plt.ion()
+    if not interactive_plot:
+        plt.ion()
     fig.patch.set_facecolor('white')
     return fig
 
-def top_table(signature, library, result, n=10, center=True):
+def top_table(signature, library, result, n=10, center=True, interactive_plot=False):
     """
     Plot a table to enrichment results for top N enriched gene sets for a given geneset and signature.
 
@@ -149,13 +151,14 @@ def top_table(signature, library, result, n=10, center=True):
     Returns:
     figure: The running sum plot for the given geneset and signature.
     """
+    if not interactive_plot:
+        plt.ioff()
     signature = signature.copy()
     signature.columns = ["i","v"]
     sig = signature.sort_values("v", ascending=False).set_index("i")
     sig = sig[~sig.index.duplicated(keep='first')]
     if center:
         signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
-    plt.ioff()
     fig = plt.figure(figsize=(5,0.5*n), frameon=False)
     ax = fig.add_subplot(111)
     fig.patch.set_visible(False)
@@ -181,5 +184,6 @@ def top_table(signature, library, result, n=10, center=True):
         else:
             ax.vlines(hits, ymax=ln[i], ymin=ln[i+1], color="blue", lw=0.5, alpha=0.3)
     fig.patch.set_facecolor('white')
-    plt.ion()
+    if not interactive_plot:
+        plt.ion()
     return fig
