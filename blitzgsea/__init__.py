@@ -269,8 +269,9 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         if verbose:
             print('Low numer of permutations can lead to inaccurate p-value estimation. Consider increasing number of permutations.')
         symmetric = True
-
+    
     random.seed(seed)
+    np.random.seed(seed)
     sig_hash = hash(signature.to_string())
 
     # optionally noise can be added as a fraction of the expression values
