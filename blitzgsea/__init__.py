@@ -197,14 +197,14 @@ def estimate_anchor_star(args):
 def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
     es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, seed))
     
-    pos = es[np.where(es > 0)[0]]
-    neg = es[np.where(es < 0)[0]]
+    pos = es[es > 0]
+    neg = es[es < 0]
 
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
         symmetric = False
     
     if symmetric:
-        aes = np.abs(es)
+        aes = np.abs(es)[es != 0]
         fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
         ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
         ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
@@ -258,7 +258,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     """
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
-
+    
     signature = signature.copy()
     signature.columns = ["i","v"]
     if permutations < 1000 and not symmetric:
