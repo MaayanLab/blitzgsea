@@ -45,8 +45,6 @@ def enrichment_score(abs_signature, signature_map, gene_set):
     number_hits = len(hits)
     number_miss = len(abs_signature) - number_hits
     sum_hit_scores = np.sum(abs_signature[hits])
-    if sum_hit_scores == 0:
-        return 0, 0
     norm_hit = float(1.0/sum_hit_scores)
     norm_no_hit = float(1.0/number_miss)
     running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
@@ -57,14 +55,11 @@ def enrichment_score(abs_signature, signature_map, gene_set):
 def enrichment_score_null(abs_signature, hit_indicator, number_hits):
     np.random.shuffle(hit_indicator)
     hits = np.where(hit_indicator == 1)[0]
-    no_hit_indicator = 1 - hit_indicator
     number_miss = len(abs_signature) - number_hits
     sum_hit_scores = np.sum(abs_signature[hits])
-    if sum_hit_scores == 0:
-        return 0
-    norm_hit = float(1.0/sum_hit_scores)
-    norm_no_hit = float(1.0/number_miss)
-    running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - no_hit_indicator * norm_no_hit)
+    norm_hit = 1.0/sum_hit_scores
+    norm_no_hit = 1.0/number_miss
+    running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - (1 - hit_indicator) * norm_no_hit)
     peak = np.abs(running_sum).argmax()
     es = running_sum[peak]
     return es
@@ -201,7 +196,7 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
     neg = es[es < 0]
 
     if (len(neg) < 250 or len(pos) < 250) and not symmetric:
-        symmetric = False
+        symmetric = True
     
     if symmetric:
         aes = np.abs(es)[es != 0]
@@ -229,7 +224,7 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
-def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=True, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
+def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
 
@@ -258,7 +253,7 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
     """
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
-    
+
     signature = signature.copy()
     signature.columns = ["i","v"]
     if permutations < 1000 and not symmetric:
@@ -312,7 +307,6 @@ def gsea(signature, library, permutations: int=2000, anchors: int=20, min_size: 
         }
     
     gsets = []
-
     keys = list(library.keys())
     signature_genes = set(signature.index)
 
