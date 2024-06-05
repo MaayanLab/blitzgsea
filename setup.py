@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="blitzgsea",
-    version="1.3.42",
+    version="1.3.43",
     author="Alexander Lachmann",
     author_email="alexander.lachmann@mssm.edu",
     description="Package for fast and accurate calculation of Gene Set Enrichment Analysis (GSEA) similar to prerank using gamma distribution approximation.",
