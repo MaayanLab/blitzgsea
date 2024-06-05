@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
 import multiprocessing
+multiprocessing.freeze_support()
 
 from mpmath import mp, mpf
 
