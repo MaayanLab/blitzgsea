@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 from statsmodels.stats.multitest import multipletests
 import multiprocessing
-multiprocessing.freeze_support()
 
 from mpmath import mp, mpf
 
@@ -225,6 +224,7 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
 
     return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
 
+
 def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
@@ -252,6 +252,7 @@ def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: 
     Returns:
     array-like: Enrichment scores for each gene set in the library.
     """
+    
     if seed == -1:
         seed = random.randint(-10000000, 100000000)
 
