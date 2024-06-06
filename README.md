@@ -40,7 +40,8 @@ blitz.enrichr.print_libraries()
 library = blitz.enrichr.get_library("KEGG_2021_Human")
 
 # run enrichment analysis
-result = blitz.gsea(signature, library)
+if __name__ == "__main__":  # make sure process is main, when run in a script it can cause errors otherwise
+  result = blitz.gsea(signature, library)
 ```
 
 ### Example Input
@@ -118,7 +119,8 @@ import pandas as pd
 signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing/ageing_muscle_gtex.tsv")
 
 # run enrichment analysis
-result = blitz.gsea(signature, library, shared_null=True)
+if __name__ == "__main__":
+  result = blitz.gsea(signature, library, shared_null=True)
 ```
 
 ### Plotting enrichment results
@@ -138,7 +140,8 @@ signature = pd.read_csv("https://github.com/MaayanLab/blitzgsea/raw/main/testing
 library = blitz.enrichr.get_library("KEGG_2021_Human")
 
 # run enrichment analysis
-result = blitz.gsea(signature, library)
+if __name__ == "__main__":
+  result = blitz.gsea(signature, library)
 
 # plot the enrichment results and save to pdf
 fig = blitz.plot.running_sum(signature, "Cell adhesion molecules", library, result=result, compact=False)
