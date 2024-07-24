@@ -4,18 +4,19 @@ from mpmath import mp, exp, log
 import math
 from scipy.stats import norm, gamma
 
-def gammacdf(x, k, theta):
+def gammacdf(x, k, theta, dps=100):
     """
     Gamma distribution cumulative distribution function.
     k is the shape parameter
     theta is the scale parameter (reciprocal of the rate parameter)
     Unlike scipy, a location parameter is not included.
     """
+    mp.dps = dps
     with mp.extradps(mp.dps):
         x = mp.mpf(x)
         if x < 0:
             return mp.zero
-        return float(mp.gammainc(k, 0, x/theta, regularized=True))
+        return mp.gammainc(k, 0, x/theta, regularized=True)
 
 def gammacdf1(x, k, theta):
     log_sf_value = gamma.logsf(x, k, scale=theta)
@@ -50,9 +51,15 @@ def invcdf_old(p, mu=0, sigma=1):
         return x
 
 def invcdf(p, mu=0, sigma=1):
+    orig_p = p
+    if p > 0.5:
+        p = 1- p
     p = float(p)
     if math.isnan(p):
         p = 1
     p = min(max(p, 0), 1)
     n = norm.isf(p)
+
+    if orig_p > 0.5:
+        return -n
     return n
