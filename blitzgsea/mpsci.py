@@ -59,7 +59,6 @@ def invcdf(p, mu=0, sigma=1):
         p = 1
     p = min(max(p, 0), 1)
     n = norm.isf(p)
-
     if orig_p > 0.5:
         return -n
     return n
