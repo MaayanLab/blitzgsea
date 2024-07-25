@@ -85,6 +85,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `min_size` | int | 5 | Minimum number of genes in geneset. |
 | `max_size` | int | 4000 | Maximal number of genes in gene set. |
 | `anchors`	| int | 20 | Number of gene set size distributions calculated. Remaining are interpolated. |
+| `deep_accuracy`	| int | 50 | Adjust for higher precision if p-value calculation causes numerical instability resulting in NA values. |
 | `processes`	| int | 4	| Number of parallel threads. Not much gain after 4 threads. |
 | `symmetric` | bool | False | Use same distribution parameters for negative and positive ES. If `False` estimate them separately. |
 | `signature_cache` | bool | True | Cache precomputed anchor parameters in memory for later reuse. |
