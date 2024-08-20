@@ -350,14 +350,10 @@ def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: 
                     prob = gammacdf(-es, float(pos_alpha), float(pos_beta), dps=deep_accuracy)
                 prob_two_tailed = np.min([0.5,(1-np.min([(((prob)-(prob*pos_ratio))+pos_ratio),1]))])
                 if prob_two_tailed == 0.5:
-                    #print("help")
                     prob_two_tailed = prob_two_tailed-prob
 
                 nes = invcdf(np.min([1,prob_two_tailed]))
-
-                if nes == 0:
-                    print("Fixy", k, es, prob, prob_two_tailed, gsize)
-
+                
                 pval = 2*prob_two_tailed
             
             mp.dps = accuracy
@@ -371,8 +367,12 @@ def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: 
     if not verbose:
         np.seterr(divide = 'ignore')
     
-    fdr_values = multipletests(pvals, method="fdr_bh")[1]
-    sidak_values = multipletests(pvals, method="sidak")[1]
+    if len(pvals) > 1:
+        fdr_values = multipletests(pvals, method="fdr_bh")[1]
+        sidak_values = multipletests(pvals, method="sidak")[1]
+    else:
+        fdr_values = pvals
+        sidak_values = pvals
 
     res =  pd.DataFrame([gsets, np.array(ess), np.array(ness), np.array(pvals), np.array(sidak_values), np.array(fdr_values), np.array(set_size), np.array(legeness)]).T
     res.columns = ["Term", "es", "nes", "pval", "sidak", "fdr","geneset_size", "leading_edge"]
