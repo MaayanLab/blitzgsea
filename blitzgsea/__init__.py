@@ -52,8 +52,8 @@ def enrichment_score(abs_signature, signature_map, gene_set):
     es = running_sum[nn]
     return running_sum, es
 
-def enrichment_score_null(abs_signature, hit_indicator, number_hits):
-    np.random.shuffle(hit_indicator)
+def enrichment_score_null(abs_signature, hit_indicator, number_hits, rng):
+    rng.shuffle(hit_indicator)
     hits = np.where(hit_indicator == 1)[0]
     number_miss = len(abs_signature) - number_hits
     sum_hit_scores = np.sum(abs_signature[hits])
@@ -85,12 +85,12 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
     return es
 
 def get_peak_size_adv(abs_signature, number_hits, permutations, seed):
-    random.seed(seed)
+    rng = np.random.RandomState(seed=seed)
     es = []
     hit_indicator = np.zeros(len(abs_signature))
     hit_indicator[0:number_hits] = 1
     for i in range(permutations):
-        es.append(enrichment_score_null(abs_signature, hit_indicator, number_hits))
+        es.append(enrichment_score_null(abs_signature, hit_indicator, number_hits, rng))
     return es
 
 def loess_interpolation(x, y, frac=0.5):
