@@ -84,13 +84,25 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
         es.append(enrichment_score(abs_signature, signature_map, rgenes)[1])
     return es
 
-def get_peak_size_adv(abs_signature, number_hits, permutations, seed):
+def get_peak_size_adv_old(abs_signature, number_hits, permutations, seed):
     random.seed(seed)
     es = []
     hit_indicator = np.zeros(len(abs_signature))
     hit_indicator[0:number_hits] = 1
     for i in range(permutations):
         es.append(enrichment_score_null(abs_signature, hit_indicator, number_hits))
+    return es
+
+def get_peak_size_adv(abs_signature, number_hits, permutations, seed):
+    random.seed(seed)
+    es = []
+    hit_indicator = np.zeros(len(abs_signature))
+    hit_indicator[0:number_hits] = 1
+    for i in range(permutations):
+        es_val = enrichment_score_null(abs_signature, hit_indicator.copy(), number_hits)
+        if np.isnan(es_val):
+            continue  # Skip invalid permutations
+        es.append(es_val)
     return es
 
 def loess_interpolation(x, y, frac=0.5):
