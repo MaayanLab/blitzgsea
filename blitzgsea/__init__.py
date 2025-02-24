@@ -34,6 +34,46 @@ mp.prec = 1000
 global pdf_cache
 pdf_cache = {}
 
+
+def estimate_anchor_star(args):
+    return estimate_anchor(*args)
+
+def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
+    es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, seed))
+    
+    pos = es[es > 0]
+    neg = es[es < 0]
+
+    if (len(neg) < 250 or len(pos) < 250) and not symmetric:
+        symmetric = True
+    
+    if symmetric:
+        aes = np.abs(es)[es != 0]
+        fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
+        ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+
+        alpha_pos = fit_alpha
+        beta_pos = fit_beta
+        
+        alpha_neg = fit_alpha
+        beta_neg = fit_beta
+    else:
+        fit_alpha, fit_loc, fit_beta = gamma.fit(pos, floc=0)
+        ks_pos = kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        alpha_pos = fit_alpha
+        beta_pos = fit_beta
+        
+        fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg), floc=0)
+        ks_neg = kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        alpha_neg = fit_alpha
+        beta_neg = fit_beta
+
+    pos_ratio = len(pos)/(len(pos)+len(neg))
+
+    return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
+
+
 def strip_gene_set(signature_genes, gene_set):
     return [x for x in gene_set if x in signature_genes]
 
@@ -105,25 +145,21 @@ def get_peak_size_adv(abs_signature, number_hits, permutations, seed):
         es.append(es_val)
     return es
 
-def loess_interpolation(x, y, frac=0.5):
-    yl = np.array(y)
-    #xout, yout, wout = loess_1d(x, yl, frac=frac)
-    #return interpolate.interp1d(xout, yout)
+def loess_interpolation(x, y, frac=0.6, it=4):
     yout = lowess(y, x, frac=frac)[:, 1]
-    return interpolate.interp1d(x, yout)
+    return interpolate.interp1d(x, yout, bounds_error=False, fill_value="extrapolate")
 
-def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, max_size=4000, symmetric: bool=False, calibration_anchors: int=20, plotting: bool=False, processes=4, verbose=False, progress=False, seed: int=0):
+def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, max_size=4000, symmetric: bool=False, calibration_anchors: int=40, plotting: bool=False, processes=4, verbose=False, progress=False, seed: int=0):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
     cc = Counter(ll)
     set_sizes = pd.DataFrame(list(cc.items()),columns = ['set_size','count']).sort_values("set_size")
     set_sizes["cumsum"] = np.cumsum(set_sizes.iloc[:,1])
-    
-    ll = [len(library[l]) for l in library]
-    nn = np.percentile(ll, q=np.linspace(2, 100, calibration_anchors))
-    anchor_set_sizes = sorted(list(set(np.append([1,4,6,max_size, np.min([max_size, np.max(ll)]), np.min([max_size, int(signature.shape[0]/2)]), np.min([max_size, signature.shape[0]-1])], nn).astype("int"))))
-    anchor_set_sizes = [int(x) for x in anchor_set_sizes if x < signature.shape[0]]
+
+    anchor_set_sizes = [int(x) for x in list(np.linspace(1, np.max(ll), calibration_anchors))]
+    anchor_set_sizes.extend([1,2,3,4,5,6,7,12,16,20,30,40,50,60,70,80,100, np.max(ll)+10, np.max(ll)+30])
+    anchor_set_sizes = sorted(list(set(anchor_set_sizes)))
 
     if processes == 1:
         process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes)
@@ -157,14 +193,14 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     anchor_set_sizes = np.array(anchor_set_sizes, dtype=float)
     
     f_alpha_pos = loess_interpolation(anchor_set_sizes, alpha_pos)
-    f_beta_pos = loess_interpolation(anchor_set_sizes, beta_pos, frac=0.2)
+    f_beta_pos = loess_interpolation(anchor_set_sizes, beta_pos, frac=0.15)
     
     f_alpha_neg = loess_interpolation(anchor_set_sizes, alpha_neg)
-    f_beta_neg = loess_interpolation(anchor_set_sizes, beta_neg, frac=0.2)
+    f_beta_neg = loess_interpolation(anchor_set_sizes, beta_neg, frac=0.15)
 
     # fix issue with numeric instability
     pos_ratio = pos_ratio - np.abs(0.0001*np.random.randn(len(pos_ratio)))
-    f_pos_ratio = loess_interpolation(anchor_set_sizes, pos_ratio)
+    f_pos_ratio = loess_interpolation(anchor_set_sizes, pos_ratio, frac=0.5)
     
     if plotting:
         xx = np.linspace(min(anchor_set_sizes), max(anchor_set_sizes), 1000)
@@ -174,70 +210,36 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
         yy = f_alpha_pos(xx)
         plt.figure(1)
         plt.plot(xx, yy, '--', lw=3)
-        plt.plot(anchor_set_sizes, alpha_pos, 'ko')
-        
+        plt.plot(anchor_set_sizes, alpha_pos, 'o')
+        plt.title("alpha pos")
+
         yy = f_alpha_neg(xx)
-        plt.figure(1)
-        plt.plot(xx, yy, '--', lw=3, c="orange")
-        plt.plot(anchor_set_sizes, alpha_neg, 'o', c="coral")
-        
-        yy = f_beta_pos(xx)
-        plt.figure(1)
+        plt.figure(2)
         plt.plot(xx, yy, '--', lw=3)
-        plt.plot(anchor_set_sizes, beta_pos, 'ko')
+        plt.plot(anchor_set_sizes, alpha_neg, 'o', c="coral")
+        plt.title("alpha neg")
+
+        yy = f_beta_pos(xx)
+        plt.figure(3)
+        plt.plot(xx, yy, '--', lw=3, c="orange")
+        plt.plot(anchor_set_sizes, beta_pos, 'o', c="coral")
+        plt.title("beta pos")
         
         yy = f_beta_neg(xx)
-        plt.figure(1)
-        plt.plot(xx, yy, '--', lw=3, c="orange")
-        plt.plot(anchor_set_sizes, beta_neg, 'o', c="coral")
-        
+        plt.figure(4)
+        plt.plot(xx, yy, '--', lw=3, c="green")
+        plt.plot(anchor_set_sizes, beta_neg, 'o', c="darkgreen")
+        plt.title("beta neg")
+
         yy = f_pos_ratio(xx)
-        plt.figure(2)
+        plt.figure(5)
         plt.plot(xx, yy, lw=3)
         plt.plot(anchor_set_sizes, pos_ratio, 'o', c="black")
-        
-    return f_alpha_pos, f_beta_pos, f_pos_ratio, np.mean(ks_pos), np.mean(ks_neg)
+        plt.title("pos ratio")
+            
+    return f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, np.mean(ks_pos), np.mean(ks_neg)
 
-def estimate_anchor_star(args):
-    return estimate_anchor(*args)
-
-def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
-    es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, seed))
-    
-    pos = es[es > 0]
-    neg = es[es < 0]
-
-    if (len(neg) < 250 or len(pos) < 250) and not symmetric:
-        symmetric = True
-    
-    if symmetric:
-        aes = np.abs(es)[es != 0]
-        fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
-        ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
-        ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
-
-        alpha_pos = fit_alpha
-        beta_pos = fit_beta
-        
-        alpha_neg = fit_alpha
-        beta_neg = fit_beta
-    else:
-        fit_alpha, fit_loc, fit_beta = gamma.fit(pos, floc=0)
-        ks_pos = kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
-        alpha_pos = fit_alpha
-        beta_pos = fit_beta
-        
-        fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg), floc=0)
-        ks_neg = kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
-        alpha_neg = fit_alpha
-        beta_neg = fit_beta
-
-    pos_ratio = len(pos)/(len(pos)+len(neg))
-
-    return alpha_pos, beta_pos, ks_pos, alpha_neg, beta_neg, ks_neg, pos_ratio
-
-
-def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
+def gsea(signature, library, permutations: int=1000, anchors: int=40, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
 
@@ -310,14 +312,14 @@ def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: 
     if sig_hash in pdf_cache.keys() and signature_cache:
         if verbose:
             print("Use cached anchor parameters")
-        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = pdf_cache[sig_hash]["model"]
+        f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, ks_pos, ks_neg = pdf_cache[sig_hash]["model"]
     else:
-        f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress, max_size=max_size)
+        f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress, max_size=max_size)
         xv, pdf = create_pdf(np.array(signature["v"]), kl_bins)
         pdf_cache[sig_hash] = {
             "xvalues": xv,
             "pdf": pdf,
-            "model": (f_alpha_pos, f_beta_pos, f_pos_ratio, ks_pos, ks_neg),
+            "model": (f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, ks_pos, ks_neg),
         }
     
     gsets = []
@@ -341,7 +343,8 @@ def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: 
             pos_alpha = f_alpha_pos(gsize)
             pos_beta = f_beta_pos(gsize)
             pos_ratio = max(0, min(1.0, f_pos_ratio(gsize)))
-
+            neg_alpha = f_alpha_neg(gsize)
+            neg_beta = f_beta_neg(gsize)
             mp.dps = accuracy
             mp.prec = accuracy
 
@@ -355,11 +358,11 @@ def gsea(signature, library, permutations: int=1000, anchors: int=20, min_size: 
                 nes = invcdf(1-np.min([1,prob_two_tailed]))
                 pval = 2*prob_two_tailed
             else:
-                prob = gamma.cdf(-es, float(pos_alpha), scale=float(pos_beta))
+                prob = gamma.cdf(-es, float(neg_alpha), scale=float(neg_beta))
                 if prob > 0.999999999 or prob < 0.00000000001:
                     mp.dps = deep_accuracy
                     mp.prec = deep_accuracy
-                    prob = gammacdf(-es, float(pos_alpha), float(pos_beta), dps=deep_accuracy)
+                    prob = gammacdf(-es, float(neg_alpha), float(neg_beta), dps=deep_accuracy)
                 prob_two_tailed = np.min([0.5,(1-np.min([(((prob)-(prob*pos_ratio))+pos_ratio),1]))])
                 if prob_two_tailed == 0.5:
                     prob_two_tailed = prob_two_tailed-prob
