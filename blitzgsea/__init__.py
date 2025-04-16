@@ -160,7 +160,9 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     anchor_set_sizes = [int(x) for x in list(np.linspace(1, np.max(ll), calibration_anchors))]
     anchor_set_sizes.extend([1,2,3,4,5,6,7,12,16,20,30,40,50,60,70,80,100, np.max(ll)+10, np.max(ll)+30])
     anchor_set_sizes = sorted(list(set(anchor_set_sizes)))
-
+    abs_signature_length = len(abs_signature)
+    anchor_set_sizes = [size for size in anchor_set_sizes if size <= abs_signature_length]
+    
     if processes == 1:
         process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, int(seed+xx)) for xx in anchor_set_sizes)
         results = list(tqdm(process_generator, desc="Calibration", total=len(anchor_set_sizes), disable=not progress))
