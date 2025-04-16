@@ -4,6 +4,28 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
 import blitzgsea as blitz
 
+def clean_library(library, signature):
+    """
+    Filter sets in the library dictionary to only contain elements present in the signature DataFrame's index.
+    
+    Parameters:
+    library (dict): Dictionary where keys are set names and values are sets of strings.
+    signature (pd.DataFrame): DataFrame with an index containing valid elements (e.g., gene names).
+    
+    Returns:
+    dict: A new dictionary with the same keys as library, but with sets filtered to only include
+          elements present in signature.index.
+    """
+    # Get the valid elements from the signature index
+    valid_elements = set(signature.index)
+    
+    # Create a new dictionary with filtered sets
+    cleaned_library = {
+        key: gene_set & valid_elements  # Keep only elements that are in both gene_set and valid_elements
+        for key, gene_set in library.items()
+    }
+    return cleaned_library
+
 def running_sum(signature, geneset, library, result=None, compact=False, center=True, interactive_plot=False):
     """
     Plot the running sum for a given geneset and signature.
@@ -25,6 +47,9 @@ def running_sum(signature, geneset, library, result=None, compact=False, center=
     signature.columns = ["i","v"]
     signature = signature.sort_values("v", ascending=False).set_index("i")
     signature = signature[~signature.index.duplicated(keep='first')]
+    library = {key: set(value) for key, value in library.items()}
+    library = clean_library(library, signature)
+
     if center:
         signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
     signature_map = {}
@@ -157,6 +182,9 @@ def top_table(signature, library, result, n=10, center=True, interactive_plot=Fa
     signature.columns = ["i","v"]
     sig = signature.sort_values("v", ascending=False).set_index("i")
     sig = sig[~sig.index.duplicated(keep='first')]
+    library = {key: set(value) for key, value in library.items()}
+    library = clean_library(library, signature)
+
     if center:
         signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
     fig = plt.figure(figsize=(5,0.5*n), frameon=False)

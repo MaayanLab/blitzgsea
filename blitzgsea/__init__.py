@@ -162,7 +162,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     anchor_set_sizes = sorted(list(set(anchor_set_sizes)))
     abs_signature_length = len(abs_signature)
     anchor_set_sizes = [size for size in anchor_set_sizes if size <= abs_signature_length]
-    
+
     if processes == 1:
         process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, int(seed+xx)) for xx in anchor_set_sizes)
         results = list(tqdm(process_generator, desc="Calibration", total=len(anchor_set_sizes), disable=not progress))
@@ -241,6 +241,28 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
             
     return f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, np.mean(ks_pos), np.mean(ks_neg)
 
+def clean_library(library, signature):
+    """
+    Filter sets in the library dictionary to only contain elements present in the signature DataFrame's index.
+    
+    Parameters:
+    library (dict): Dictionary where keys are set names and values are sets of strings.
+    signature (pd.DataFrame): DataFrame with an index containing valid elements (e.g., gene names).
+    
+    Returns:
+    dict: A new dictionary with the same keys as library, but with sets filtered to only include
+          elements present in signature.index.
+    """
+    # Get the valid elements from the signature index
+    valid_elements = set(signature.index)
+    
+    # Create a new dictionary with filtered sets
+    cleaned_library = {
+        key: gene_set & valid_elements  # Keep only elements that are in both gene_set and valid_elements
+        for key, gene_set in library.items()
+    }
+    return cleaned_library
+
 def gsea(signature, library, permutations: int=1000, anchors: int=40, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
@@ -292,7 +314,9 @@ def gsea(signature, library, permutations: int=1000, anchors: int=40, min_size: 
         signature.iloc[:,1] = signature.iloc[:,1] + np.random.normal(signature.shape[0])/(np.mean(np.abs(signature.iloc[:,1]))*100000)
     signature = signature.sort_values("v", ascending=False).set_index("i")
     signature = signature[~signature.index.duplicated(keep='first')]
-    
+    library = {key: set(value) for key, value in library.items()}
+    library = clean_library(library, signature)
+
     if center:
         signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
 
