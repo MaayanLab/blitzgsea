@@ -39,7 +39,7 @@ def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
 def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
-    es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, seed))
+    es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, int(seed)))
     
     pos = es[es > 0]
     neg = es[es < 0]
@@ -125,7 +125,7 @@ def get_peak_size(signature, abs_signature, signature_map, size, permutations, s
     return es
 
 def get_peak_size_adv_old(abs_signature, number_hits, permutations, seed):
-    random.seed(seed)
+    random.seed(int(seed))
     es = []
     hit_indicator = np.zeros(len(abs_signature))
     hit_indicator[0:number_hits] = 1
@@ -162,11 +162,11 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
     anchor_set_sizes = sorted(list(set(anchor_set_sizes)))
 
     if processes == 1:
-        process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes)
+        process_generator = (estimate_anchor(signature, abs_signature, signature_map, xx, permutations, symmetric, int(seed+xx)) for xx in anchor_set_sizes)
         results = list(tqdm(process_generator, desc="Calibration", total=len(anchor_set_sizes), disable=not progress))
     else:
         with multiprocessing.Pool(processes) as pool:
-            args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, seed+xx) for xx in anchor_set_sizes]
+            args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, int(seed+xx)) for xx in anchor_set_sizes]
             results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args), disable=not progress))
     
     alpha_pos = []
