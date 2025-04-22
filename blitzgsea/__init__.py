@@ -93,13 +93,15 @@ def enrichment_score(abs_signature, signature_map, gene_set):
     return running_sum, es
 
 def enrichment_score_null(abs_signature, hit_indicator, number_hits):
-    np.random.shuffle(hit_indicator)
-    hits = np.where(hit_indicator == 1)[0]
+    hits = np.random.choice(len(abs_signature), size=number_hits, replace=False)
+    hit_indicator_new = np.zeros(len(abs_signature), dtype=np.float32)
+    hit_indicator_new[hits] = 1
     number_miss = len(abs_signature) - number_hits
     sum_hit_scores = np.sum(abs_signature[hits])
-    norm_hit = 1.0/sum_hit_scores
-    norm_no_hit = 1.0/number_miss
-    running_sum = np.cumsum(hit_indicator * abs_signature * norm_hit - (1 - hit_indicator) * norm_no_hit)
+    norm_hit = 1.0 / sum_hit_scores
+    norm_no_hit = 1.0 / number_miss
+    increment = hit_indicator_new * (abs_signature * norm_hit + norm_no_hit) - norm_no_hit
+    running_sum = np.cumsum(increment, dtype=np.float32)
     peak = np.abs(running_sum).argmax()
     es = running_sum[peak]
     return es
