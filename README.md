@@ -98,6 +98,7 @@ The main function of `blitzgsea.gsea()` supports several optional parameters. Th
 | `seed` | int | 0 | Random seed. Same seed will result in identical result. If seed equal `-1` generate random seed. |
 | `add_noise` | bool | False | Add small random noise to signature. The noise is a fraction of the expression values. |
 | `center` | bool | True | Center signature values at 0 before calculating running sum. |
+| `ks_disable` | bool | False | If set to `False` Kolmogorov Smirnov test is computed. If `True` skip this. |
 
 ### Speeding up enrichment calculations
 
