@@ -38,7 +38,7 @@ pdf_cache = {}
 def estimate_anchor_star(args):
     return estimate_anchor(*args)
 
-def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed):
+def estimate_anchor(signature, abs_signature, signature_map, set_size, permutations, symmetric, seed, ks_disable):
     es = np.array(get_peak_size_adv(abs_signature, set_size, permutations, int(seed)))
     
     pos = es[es > 0]
@@ -50,8 +50,13 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
     if symmetric:
         aes = np.abs(es)[es != 0]
         fit_alpha, fit_loc, fit_beta = gamma.fit(aes, floc=0)
-        ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
-        ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+
+        if ks_disable:
+            ks_pos = 1
+            ks_neg = 1
+        else:
+            ks_pos = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+            ks_neg = kstest(aes, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
 
         alpha_pos = fit_alpha
         beta_pos = fit_beta
@@ -60,12 +65,16 @@ def estimate_anchor(signature, abs_signature, signature_map, set_size, permutati
         beta_neg = fit_beta
     else:
         fit_alpha, fit_loc, fit_beta = gamma.fit(pos, floc=0)
-        ks_pos = kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        ks_pos = 1
+        ks_neg = 1
+        if not ks_disable:
+            ks_pos = kstest(pos, 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
         alpha_pos = fit_alpha
         beta_pos = fit_beta
         
         fit_alpha, fit_loc, fit_beta = gamma.fit(-np.array(neg), floc=0)
-        ks_neg = kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
+        if not ks_disable:
+            ks_neg = kstest(-np.array(neg), 'gamma', args=(fit_alpha, fit_loc, fit_beta))[1]
         alpha_neg = fit_alpha
         beta_neg = fit_beta
 
@@ -151,7 +160,7 @@ def loess_interpolation(x, y, frac=0.6, it=4):
     yout = lowess(y, x, frac=frac)[:, 1]
     return interpolate.interp1d(x, yout, bounds_error=False, fill_value="extrapolate")
 
-def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, max_size=4000, symmetric: bool=False, calibration_anchors: int=40, plotting: bool=False, processes=4, verbose=False, progress=False, seed: int=0):
+def estimate_parameters(signature, abs_signature, signature_map, library, permutations: int=2000, max_size=4000, symmetric: bool=False, calibration_anchors: int=40, plotting: bool=False, processes=4, verbose=False, progress=False, seed: int=0, ks_disable=False):
     ll = []
     for key in library.keys():
         ll.append(len(library[key]))
@@ -170,7 +179,7 @@ def estimate_parameters(signature, abs_signature, signature_map, library, permut
         results = list(tqdm(process_generator, desc="Calibration", total=len(anchor_set_sizes), disable=not progress))
     else:
         with multiprocessing.Pool(processes) as pool:
-            args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, int(seed+xx)) for xx in anchor_set_sizes]
+            args = [(signature, abs_signature, signature_map, xx, permutations, symmetric, int(seed+xx), ks_disable) for xx in anchor_set_sizes]
             results = list(tqdm(pool.imap(estimate_anchor_star, args), desc="Calibration", total=len(args), disable=not progress))
     
     alpha_pos = []
@@ -265,7 +274,7 @@ def clean_library(library, signature):
     }
     return cleaned_library
 
-def gsea(signature, library, permutations: int=1000, anchors: int=40, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True):
+def gsea(signature, library, permutations: int=1000, anchors: int=40, min_size: int=5, max_size: int=4000, processes: int=4, plotting: bool=False, verbose: bool=False, progress: bool=False, symmetric: bool=False, signature_cache: bool=True, kl_threshold: float=0.3, kl_bins: int=200, shared_null: bool=False, seed: int=0, add_noise: bool=False, accuracy: int=40, deep_accuracy: int=50, center=True, ks_disable=False):
     """
     Perform Gene Set Enrichment Analysis (GSEA) on the given signature and library.
 
@@ -342,7 +351,7 @@ def gsea(signature, library, permutations: int=1000, anchors: int=40, min_size: 
             print("Use cached anchor parameters")
         f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, ks_pos, ks_neg = pdf_cache[sig_hash]["model"]
     else:
-        f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress, max_size=max_size)
+        f_alpha_pos, f_beta_pos, f_pos_ratio, f_alpha_neg, f_beta_neg, ks_pos, ks_neg = estimate_parameters(signature, abs_signature, signature_map, library, permutations=permutations, calibration_anchors=anchors, processes=processes, symmetric=symmetric, plotting=plotting, verbose=verbose, seed=seed, progress=progress, max_size=max_size, ks_disable=ks_disable)
         xv, pdf = create_pdf(np.array(signature["v"]), kl_bins)
         pdf_cache[sig_hash] = {
             "xvalues": xv,
