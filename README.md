@@ -1,4 +1,4 @@
-<img title="a title" alt="blitzGSEA" src="https://github.com/MaayanLab/blitzgsea/raw/main/icon/bgsea_small.png" width=200>
+![bgsea_small](https://github.com/user-attachments/assets/e9a95d0d-c796-4041-bfa7-7e31664e6119)
 
 [Installation](#installation) | [Example](#python-example) | [Optional Parameters](#optional-parameters) | [Speed-up](#speeding-up-enrichment-calculations) | [Plotting](#plotting-enrichment-results) | [Attribution](#attribution) | [References](#references)
 
