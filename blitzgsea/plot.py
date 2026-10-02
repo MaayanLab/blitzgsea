@@ -183,7 +183,7 @@ def top_table(signature, library, result, n=10, center=True, interactive_plot=Fa
     sig = signature.sort_values("v", ascending=False).set_index("i")
     sig = sig[~sig.index.duplicated(keep='first')]
     library = {key: set(value) for key, value in library.items()}
-    library = clean_library(library, signature)
+    library = clean_library(library, sig)
 
     if center:
         signature.loc[:,"v"] -= np.mean(signature.loc[:,"v"])
